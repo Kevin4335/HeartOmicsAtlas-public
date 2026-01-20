@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-site-verification" content="2pMqDeXLKfolBqDufnjJ3nCT1tU7Jc7vNm_LBC2GSI8" />
+  <title>scRNA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Lexend:wght@100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+  
+  <link href="/css/reset.css" rel="stylesheet">
+  <link href="/css/global.css" rel="stylesheet">
+  <link href="/css/lib.css" rel="stylesheet">
+  <link href="/css/scrna.css" rel="stylesheet">
+  <script src="/js/lib.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/scrna.js"></script>
+  <!--$jtc.unique.replacer$<link rel="prefetch" href="/html/help.html">
+  <link rel="prefetch" href="/html/about.html">$jtc.unique.replacer$-->
+</head>
+
+<body class="about">
+  <header>
+    <nav>
+      <div id="title-text">
+        <img src="/imgs/heart_logo_1.png" id="logo"><h1>Heart<p>Omics</p>Atlas</h1>
+      </div>
+      <div id="nav">
+        <a href="/html/home.html">Home</a>
+        <a href="/html/ai_chat.html">Chat with AI</a>
+        <a href="/html/st.html">Spatial Transcriptomics</a>
+        <a href="/html/mo.html">Multiomics</a>
+        <a href="/html/scrna.html" class="current">scRNA</a>
+
+      </div>
+    </nav>
+  </header>
+  <div id="main-container">
+    <div class="lib-2-to-1 hidden" id="cell-selection">
+      <label>
+        <input class = "radio" type="radio" name="cell-selection" id="ep-select">
+        <p>Sinoid</p>
+      </label>
+      <label>
+        <input class = "radio" type="radio" name="cell-selection" id="eecs-select">
+        <p>SAN-PCO</p>
+      </label>
+    </div>
+    <h1 class="sub-title">Select Cell Type scRNA</h1>
+    <p class="sub-description">We developed a approach to differentiate 3D Sinoatrial node organoid
+      (Sinoid) using human pluripotent stem cell which containing several cell
+      types similar to the in vivo situation. By assembling with 3D cardiomyocytes
+      organoid (Cardioid), we made the SAN-PCO which further mimic the pacing
+      and conduction processes. 
+    </p>
+
+    <div class="card-selection">
+      <label class="card" id="left-card" for="ep-select">
+        <h3>Sinoid</h3>
+        <p>A 3D vascularized organoid model containing sinoatrial node cells.
+        </p>
+        
+      </label>
+      <label class="card" id="right-card" for="eecs-select">
+        <h3>SAN-PCO</h3>
+        <p>An assembling organoids containing sinoatrial node and working cardiomyocytes, as well as autonomic neurons.</p>
+      </label>
+    </div>
+    <div id="whole-img-container" class="">
+      <div id="main-img-container" class="">  <!-- loading, error, shown -->
+        <img id="final-img">
+        <div id="loading">
+          <img src="/imgs/loading-gif.gif">
+          <p>Loading...</p>
+        </div>
+        <p id="error"></p>
+        <p id="email-result">Submit success successfully, please check your email later.</p>
+      </div>
+      <div id="static-imgs">
+        <img src="/imgs/placeholder.png" class="ep" id="ep-left">
+        <img src="/imgs/placeholder.png" class="ep" id="ep-right">
+        <img src="/imgs/placeholder.png" class="eecs" id="eecs-left">
+        <img src="/imgs/placeholder.png" class="eecs" id="eecs-right">
+      </div>
+
+      
+
+    </div>
+
+    
+    <div id="gene-inputs" style="margin-top: 20px;">
+
+      <!-- SINOID Group -->
+      <div id="sinoid-wrapper">
+        <div id="sinoid-input-container" class="gene-input-box hidden">
+          <div class="gene-input-row">
+            <input type="text" id="sinoid-gene-input" placeholder="Enter gene for Sinoid..." />
+            <button id="sinoid-gene-submit">Submit</button>
+          </div>
+
+          <div class="example-genes">
+            <span class="example-text">Examples:</span>
+            <span class="gene-bubble">CICP27</span>
+            <span class="gene-bubble">VWA1</span>
+            <span class="gene-bubble">PANK4</span>
+          </div>
+        </div>
+
+        <img id="sinoid-selected" class="gene-img strong_hidden" style="margin-top: 2vw; max-width: 100%;">
+      </div>
+
+      <!-- SAN-PCO Group -->
+      <div id="sanpco-wrapper">
+        <div id="sanpco-input-container" class="gene-input-box hidden">
+          <div class="gene-input-row">
+            <input type="text" id="sanpco-gene-input" placeholder="Enter gene for SAN-PCO..." />
+            <button id="sanpco-gene-submit">Submit</button>
+          </div>
+
+          <div class="example-genes">
+            <span class="example-text">Examples:</span>
+            <span class="gene-bubble">MYH7</span>
+            <span class="gene-bubble">NOC2L</span>
+            <span class="gene-bubble">HES4</span>
+          </div>
+        </div>
+
+        <img id="sanpco-selected" class="gene-img strong_hidden" style="margin-top: 2vw; max-width: 100%;">
+      </div>
+
+      <!-- Intro images -->
+      <img id="sinoid-intro" src="/imgs/sinoid_static_plot.png" class="intro-image hidden" />
+      <img id="sanpco-intro" src="/imgs/san_pco_static_plot.png" class="intro-image hidden" />
+    </div>
+
+
+
+  <!-- <div id="tmp-place-holder" style="min-height: 30vw;"></div> -->
+</body>
+<footer>
+  <p>
+    Copyright &copy; Chen lab at Weill Cornell Medicine 2025 All rights reserved.
+  </p>
+</footer>
+
+</html>
