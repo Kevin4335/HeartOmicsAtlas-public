@@ -22,10 +22,12 @@
     padding-left: 1.5vw;
     padding-right: 1.5vw;
     padding-bottom: 1.5vw;
+    padding-top: 1.5vw;
     box-sizing: border-box;
     background: linear-gradient(to top, #a16761, #780000);
-    border-radius:20px;
-    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .right {
@@ -174,6 +176,9 @@ html {
     line-height: 1;
     height: 1.8vw;
     font-family: "Lexend", sans-serif;
+    color: #780000;
+    font-weight: 500;
+    letter-spacing: 0.02em;
 }
 
 
@@ -182,7 +187,8 @@ html {
     max-height: 60.5vw;
     width: 100%;
     border-radius: 0.5vw;
-    /* background-color: paleturquoise; */
+    padding: 0.5vw;
+    box-sizing: border-box;
 }
 
 
@@ -199,19 +205,22 @@ html {
     height: 3vw;
     font-size: 1.15vw;
     border-radius: 0.8vw;
-    border: 0.1vw solid #aeadad;
+    border: 0.15vw solid #d0d0d0;
     padding: 0.7vw 6vw 0vw 0.7vw; /* Make space for button on the right */
-    caret-color: #3478F6;
+    caret-color: #780000;
     resize: none;
     box-sizing: border-box;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    background-color: #ffffff;
 }
 
 
 #chat-input-text:focus{
-    border: 0.1vw solid #aeadad !important;
+    border: 0.15vw solid #780000 !important;
     outline: none;
-    
+    box-shadow: 0 4px 12px rgba(120, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
 }
 
 #chat-send {
@@ -220,22 +229,32 @@ html {
     right: 3vw;
     transform: translateY(-50%);
     border: none;
-    
     background-color: rgba(0, 0, 0, 0.0) !important;
     cursor: pointer;
     box-shadow: 0 3px 4px rgba(0, 0, 0, 0.0) !important;
+    transition: transform 0.2s ease;
+    padding: 0.3vw;
+    border-radius: 50%;
+}
+
+#chat-send:hover {
+    transform: translateY(-50%) scale(1.1);
 }
 
 #chat-send-svg{
     width: 2vw !important;
     height:auto !important;
-    
+    transition: all 0.2s ease;
 }
+
 #chat-send-svg path{
+    fill: #780000;
     fill-opacity: 0.7;
+    transition: fill-opacity 0.2s ease;
 }
-#chat-send-svg:hover path{
-    fill-opacity:1;
+
+#chat-send:hover #chat-send-svg path{
+    fill-opacity: 1;
 }
 
 #chat-input-text::-webkit-scrollbar {
@@ -315,13 +334,12 @@ html {
     -o-user-select: none;
     width: 6.5vw;
     height: 1.7vw;
-    background-color: yellow;
     box-sizing: content-box;
     padding: 0.2vw;
-    border-radius: 0.5vw;
-    background-color: #e84d94;
-    /* left: 36.5vw; */
-    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.7);
+    border-radius: 0.6vw;
+    background: linear-gradient(135deg, #e84d94 0%, #d6377f 100%);
+    box-shadow: 0 4px 8px rgba(232, 77, 148, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
 }
 
 #start-new-conversation {
@@ -335,13 +353,16 @@ html {
 
 #start-new-conversation-wrapper:hover {
     cursor: pointer;
-    background-color: #e63785;
+    background: linear-gradient(135deg, #e63785 0%, #d12a6f 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(232, 77, 148, 0.4), 0 3px 6px rgba(0, 0, 0, 0.2);
 }
 
 #start-new-conversation-wrapper:active {
     cursor: pointer;
-    background-color: #e22278;
-    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.0);
+    background: linear-gradient(135deg, #e22278 0%, #c91f65 100%);
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* TODO: color of locked */
@@ -384,19 +405,18 @@ html {
 
 .ct p {
     font-size: 1.15vw;
-    line-height: 1.2;
+    line-height: 1.4;
     margin-top: 1vw;
     margin-bottom: 1vw;
     margin-left: 5%;
-    padding: 0.5vw;
-    padding-left: 1vw;
-    padding-right: 1vw;
-    border-radius:1.5vw 1.5vw 1.5vw 1.5vw;
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
-    background-color: #e8e8e8;
+    padding: 0.8vw 1.2vw;
+    border-radius: 1.2vw 1.2vw 1.2vw 0.3vw;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+    background-color: #f5f5f5;
     max-width: 80%;
-    color: #000;
-    /* min-height: 1.5vw; */
+    color: #282828;
+    transition: all 0.2s ease;
+    border-left: 0.2vw solid #780000;
 }
 
 .ci {
@@ -409,11 +429,19 @@ html {
     margin-top: 0.5vw;
     margin-bottom: 0.5vw;
     padding: 1vw;
-    border-radius: 1.5vw;
-    background-color: #e8e8e8;
+    border-radius: 1.2vw;
+    background-color: #f5f5f5;
     max-width: 80%;
     max-height: 25vw;
     cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+    border-left: 0.2vw solid #780000;
+}
+
+.ci img:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .ce {
@@ -423,17 +451,16 @@ html {
 
 .ce p {
     font-size: 1.15vw;
-    line-height: 1.2;
+    line-height: 1.4;
     margin-top: 0.5vw;
     margin-bottom: 0.5vw;
-    padding: 0.5vw;
-    padding-left: 1vw;
-    padding-right: 1vw;
-    border-radius: 1.5vw;
-    background-color: #e8e8e8;
+    padding: 0.8vw 1.2vw;
+    border-radius: 1.2vw;
+    background-color: #ffe8e8;
     max-width: 80%;
-    color: red;
-    /* min-height: 1.5vw; */
+    color: #c62828;
+    border-left: 0.2vw solid #c62828;
+    box-shadow: 0 2px 6px rgba(198, 40, 40, 0.15), 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .cu {
@@ -444,26 +471,25 @@ html {
 
 .cu p {
     font-size: 1.15vw;
-    line-height: 1.2;
+    line-height: 1.4;
     margin-top: 1vw;
     margin-bottom: 1vw;
     margin-right: 5%;
-    padding: 0.5vw;
-    padding-left: 1vw;
-    padding-right: 1vw;
-    border-radius:1.5vw 1.5vw 1.5vw 1.5vw;
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
-    background-color: #b7e0f4;
+    padding: 0.8vw 1.2vw;
+    border-radius: 1.2vw 1.2vw 0.3vw 1.2vw;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(135deg, #b7e0f4 0%, #a8d4e8 100%);
     max-width: 80%;
-    color: #000;
-    /* min-height: 1.5vw; */
+    color: #282828;
+    transition: all 0.2s ease;
+    border-right: 0.2vw solid #780000;
 }
 
 .start-end {
     width: 90%;
     margin-left: 5%;
-    height: 0.15vw;
-    background-color: #999;
+    height: 0.1vw;
+    background: linear-gradient(to right, transparent, #d0d0d0, transparent);
     border-radius: 0.1vw;
     margin-top: 2vw;
     margin-bottom: 1vw;
@@ -522,32 +548,43 @@ main {
 
 #chat-rcmd p {
     font-size: inherit;
-    padding: 0.6vw 1vw;
-    border-radius: 1vw;
+    padding: 1vw 1.2vw;
+    border-radius: 1.2vw;
     background-color: rgb(255, 255, 255);
-    line-height: 1vw;
+    line-height: 1.4;
     text-align: left;
     font-family: inherit;
     font-size: 0.715vw;
-    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 0.1vw solid #f0f0f0;
+    cursor: pointer;
 }
 
 #chat-rcmd p strong {
     display: block;
     font-weight: 600;
     font-size: 0.95vw;
-    margin-bottom: 0.3vw;
+    margin-bottom: 0.4vw;
     color: #780000;
+    letter-spacing: 0.02em;
 }
-
 
 .rcmd-one-line {
     line-height: 3vw;
 }
 
 #chat-rcmd p:hover {
-    background-color: #e8e8e8;
+    background-color: #f8f8f8;
     cursor: pointer;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-color: #780000;
+}
+
+#chat-rcmd p:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 
