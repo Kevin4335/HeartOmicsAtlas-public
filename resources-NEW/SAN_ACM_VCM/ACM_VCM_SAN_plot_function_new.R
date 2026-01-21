@@ -118,9 +118,9 @@ app <- list(
   }
 )
 
-# Start server on port 9029 (new port)
+# Start server on port 9027
 server <- startServer("0.0.0.0", 9027, app)
-cat("ACM_VCM_SAN Omics server started at http://localhost:9029\n")
+cat("ACM_VCM_SAN Omics server started at http://localhost:9027\n")
 
 # Keep it running
 while (TRUE) {

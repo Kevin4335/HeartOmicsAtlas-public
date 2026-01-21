@@ -40,32 +40,35 @@
   <div id="main-container">
     <div class="lib-2-to-1 hidden" id="cell-selection">
       <label>
-        <input class = "radio" type="radio" name="cell-selection" id="ep-select">
-        <p>Sinoid</p>
+        <input class="radio" type="radio" name="cell-selection" id="acmvcm-select">
+        <p>ACM_VCM_SAN</p>
       </label>
       <label>
-        <input class = "radio" type="radio" name="cell-selection" id="eecs-select">
+        <input class="radio" type="radio" name="cell-selection" id="sanpco-select">
         <p>SAN-PCO</p>
+      </label>
+      <label>
+        <input class="radio" type="radio" name="cell-selection" id="miniheart-select">
+        <p>Mini-heart</p>
       </label>
     </div>
     <h1 class="sub-title">Select Cell Type scRNA</h1>
-    <p class="sub-description">We developed a approach to differentiate 3D Sinoatrial node organoid
-      (Sinoid) using human pluripotent stem cell which containing several cell
-      types similar to the in vivo situation. By assembling with 3D cardiomyocytes
-      organoid (Cardioid), we made the SAN-PCO which further mimic the pacing
-      and conduction processes. 
+    <p class="sub-description">
+      The scRNA channel is split into three subchannels: ACM_VCM_SAN, SAN-PCO, and Mini-heart.
     </p>
 
     <div class="card-selection">
-      <label class="card" id="left-card" for="ep-select">
-        <h3>Sinoid</h3>
-        <p>A 3D vascularized organoid model containing sinoatrial node cells.
-        </p>
-        
+      <label class="card" id="left-card" for="acmvcm-select">
+        <h3>ACM_VCM_SAN</h3>
+        <p>Combined dataset including ACM, VCM, and SAN populations.</p>
       </label>
-      <label class="card" id="right-card" for="eecs-select">
+      <label class="card" id="middle-card" for="sanpco-select">
         <h3>SAN-PCO</h3>
-        <p>An assembling organoids containing sinoatrial node and working cardiomyocytes, as well as autonomic neurons.</p>
+        <p>Dataset related to SAN pacing and conduction processes.</p>
+      </label>
+      <label class="card" id="right-card" for="miniheart-select">
+        <h3>Mini-heart</h3>
+        <p>Mini-heart dataset and associated visualizations.</p>
       </label>
     </div>
     <div id="whole-img-container" class="">
@@ -92,23 +95,23 @@
     
     <div id="gene-inputs" style="margin-top: 20px;">
 
-      <!-- SINOID Group -->
-      <div id="sinoid-wrapper">
-        <div id="sinoid-input-container" class="gene-input-box hidden">
+      <!-- ACM_VCM_SAN Group -->
+      <div id="acmvcm-wrapper">
+        <div id="acmvcm-input-container" class="gene-input-box hidden">
           <div class="gene-input-row">
-            <input type="text" id="sinoid-gene-input" placeholder="Enter gene for Sinoid..." />
-            <button id="sinoid-gene-submit">Submit</button>
+            <input type="text" id="acmvcm-gene-input" placeholder="Enter gene for ACM_VCM_SAN..." />
+            <button id="acmvcm-gene-submit">Submit</button>
           </div>
 
           <div class="example-genes">
             <span class="example-text">Examples:</span>
-            <span class="gene-bubble">CICP27</span>
-            <span class="gene-bubble">VWA1</span>
-            <span class="gene-bubble">PANK4</span>
+            <span class="gene-bubble">SHOX2</span>
+            <span class="gene-bubble">NPPA</span>
+            <span class="gene-bubble">MYL2</span>
           </div>
         </div>
 
-        <img id="sinoid-selected" class="gene-img strong_hidden" style="margin-top: 2vw; max-width: 100%;">
+        <img id="acmvcm-selected" class="gene-img strong_hidden" style="margin-top: 2vw; max-width: 100%;">
       </div>
 
       <!-- SAN-PCO Group -->
@@ -130,9 +133,29 @@
         <img id="sanpco-selected" class="gene-img strong_hidden" style="margin-top: 2vw; max-width: 100%;">
       </div>
 
+      <!-- Mini-heart Group -->
+      <div id="miniheart-wrapper">
+        <div id="miniheart-input-container" class="gene-input-box hidden">
+          <div class="gene-input-row">
+            <input type="text" id="miniheart-gene-input" placeholder="Enter gene for Mini-heart..." />
+            <button id="miniheart-gene-submit">Submit</button>
+          </div>
+
+          <div class="example-genes">
+            <span class="example-text">Examples:</span>
+            <span class="gene-bubble">SHOX2</span>
+            <span class="gene-bubble">HEY2</span>
+            <span class="gene-bubble">CDH5</span>
+          </div>
+        </div>
+
+        <img id="miniheart-selected" class="gene-img strong_hidden" style="margin-top: 2vw; max-width: 100%;">
+      </div>
+
       <!-- Intro images -->
-      <img id="sinoid-intro" src="/imgs/sinoid_static_plot.png" class="intro-image hidden" />
+      <img id="acmvcm-intro" src="/imgs/placeholder.png" class="intro-image hidden" />
       <img id="sanpco-intro" src="/imgs/san_pco_static_plot.png" class="intro-image hidden" />
+      <img id="miniheart-intro" src="/imgs/placeholder.png" class="intro-image hidden" />
     </div>
 
 

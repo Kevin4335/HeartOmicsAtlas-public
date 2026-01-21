@@ -1,125 +1,123 @@
-var GLB_SINOID_CURRENT = '';
+var GLB_ACM_VCM_CURRENT = '';
 var GLB_SANPCO_CURRENT = '';
-current_page = ''
+var GLB_MINIHEART_CURRENT = '';
+
 window.addEventListener('DOMContentLoaded', function () {
-    const sinoidContainer = document.getElementById('sinoid-input-container');
+    const acmvcmContainer = document.getElementById('acmvcm-input-container');
     const sanpcoContainer = document.getElementById('sanpco-input-container');
-    const sinoidIntro = document.getElementById('sinoid-intro');
+    const miniheartContainer = document.getElementById('miniheart-input-container');
+
+    const acmvcmIntro = document.getElementById('acmvcm-intro');
     const sanpcoIntro = document.getElementById('sanpco-intro');
-    document.querySelectorAll('input[name="cell-selection"]').forEach(radio => {
-        radio.addEventListener('click', () => {
-            if (radio.id === 'ep-select') {
-                // Show Sinoid input, hide SAN-PCO input
-                sinoidContainer.classList.remove('hidden');
-                document.getElementById('sinoid-selected').classList.remove('hidden');
-                sanpcoContainer.classList.add('hidden');
-                document.getElementById('sanpco-selected').classList.add('hidden');
+    const miniheartIntro = document.getElementById('miniheart-intro');
 
-                // Show Sinoid intro image
-                sinoidIntro.classList.remove('hidden');
-                sanpcoIntro.classList.add('hidden');
-            } else if (radio.id === 'eecs-select') {
-                // Show SAN-PCO input, hide Sinoid input
-                sanpcoContainer.classList.remove('hidden');
-                document.getElementById('sanpco-selected').classList.remove('hidden');
-                sinoidContainer.classList.add('hidden');
-                document.getElementById('sinoid-selected').classList.add('hidden');
+    const acmvcmImg = document.getElementById('acmvcm-selected');
+    const sanpcoImg = document.getElementById('sanpco-selected');
+    const miniheartImg = document.getElementById('miniheart-selected');
 
-                // Show SAN-PCO intro image
-                sanpcoIntro.classList.remove('hidden');
-                sinoidIntro.classList.add('hidden');
-            }
-        });
-    });
-});
-
-window.addEventListener('DOMContentLoaded', function () {
-    // Hook into gene inputs
-    const sinoidInput = document.getElementById('sinoid-gene-input');
-    const sinoidSubmit = document.getElementById('sinoid-gene-submit');
-    const sinoidImg = document.getElementById('sinoid-selected');
-
+    const acmvcmInput = document.getElementById('acmvcm-gene-input');
+    const acmvcmSubmit = document.getElementById('acmvcm-gene-submit');
     const sanpcoInput = document.getElementById('sanpco-gene-input');
     const sanpcoSubmit = document.getElementById('sanpco-gene-submit');
-    const sanpcoImg = document.getElementById('sanpco-selected');
+    const miniheartInput = document.getElementById('miniheart-gene-input');
+    const miniheartSubmit = document.getElementById('miniheart-gene-submit');
 
-    const sinoidContainer = document.getElementById('sinoid-input-container');
-    const sanpcoContainer = document.getElementById('sanpco-input-container');
+    const acmvcmCurrentRef = { value: GLB_ACM_VCM_CURRENT };
+    const sanpcoCurrentRef = { value: GLB_SANPCO_CURRENT };
+    const miniheartCurrentRef = { value: GLB_MINIHEART_CURRENT };
 
-    const sinoidIntro = document.getElementById('sinoid-intro');
-    const sanpcoIntro = document.getElementById('sanpco-intro');
+    const BASE_HOST = window.location.hostname || '128.84.41.80';
 
-    // Show/hide relevant input fields based on card selection
+    function collapseIntroCards() {
+        document.querySelectorAll('.card-selection').forEach(elem => elem.classList.add('hidden'));
+        document.querySelectorAll('.lib-2-to-1').forEach(elem => elem.classList.remove('hidden'));
+        document.querySelectorAll('.sub-title').forEach(elem => elem.classList.add('hidden'));
+        document.querySelectorAll('.sub-description').forEach(elem => elem.classList.add('hidden'));
+    }
+
+    function hideAllChannels() {
+        acmvcmContainer.classList.add('hidden');
+        sanpcoContainer.classList.add('hidden');
+        miniheartContainer.classList.add('hidden');
+
+        acmvcmIntro.classList.add('hidden');
+        sanpcoIntro.classList.add('hidden');
+        miniheartIntro.classList.add('hidden');
+
+        acmvcmImg.classList.add('hidden');
+        sanpcoImg.classList.add('hidden');
+        miniheartImg.classList.add('hidden');
+    }
+
+    function resetChannelVisuals(introEl, imgEl) {
+        introEl.classList.remove('strong_hidden');
+        imgEl.classList.add('strong_hidden');
+        imgEl.style.display = 'none';
+        imgEl.src = '';
+    }
+
+    function showChannel(channelKey) {
+        hideAllChannels();
+
+        if (channelKey === 'acmvcm') {
+            acmvcmContainer.classList.remove('hidden');
+            acmvcmIntro.classList.remove('hidden');
+            acmvcmImg.classList.remove('hidden');
+            resetChannelVisuals(acmvcmIntro, acmvcmImg);
+            document.getElementById('acmvcm-select').checked = true;
+        }
+
+        if (channelKey === 'sanpco') {
+            sanpcoContainer.classList.remove('hidden');
+            sanpcoIntro.classList.remove('hidden');
+            sanpcoImg.classList.remove('hidden');
+            resetChannelVisuals(sanpcoIntro, sanpcoImg);
+            document.getElementById('sanpco-select').checked = true;
+        }
+
+        if (channelKey === 'miniheart') {
+            miniheartContainer.classList.remove('hidden');
+            miniheartIntro.classList.remove('hidden');
+            miniheartImg.classList.remove('hidden');
+            resetChannelVisuals(miniheartIntro, miniheartImg);
+            document.getElementById('miniheart-select').checked = true;
+        }
+    }
+
+    // Card selection (first screen)
     document.querySelectorAll('.card').forEach(card => {
         card.addEventListener('click', () => {
-            
-            document.querySelectorAll('.card-selection').forEach(elem => {
-                elem.classList.add('hidden');
-            });
+            collapseIntroCards();
+            if (card.id === 'left-card') showChannel('acmvcm');
+            if (card.id === 'middle-card') showChannel('sanpco');
+            if (card.id === 'right-card') showChannel('miniheart');
+        });
+    });
 
-            document.querySelectorAll('.lib-2-to-1').forEach(elem => {
-                elem.classList.remove('hidden');
-            });
-
-            document.querySelectorAll('.sub-title').forEach(elem => {
-                elem.classList.add('hidden');
-            });
-
-            document.querySelectorAll('.sub-description').forEach(elem => {
-                elem.classList.add('hidden');
-            });
-
-
-            if (card.id === 'left-card') {
-                sinoidContainer.classList.remove('hidden');
-                document.getElementById('sinoid-selected').classList.remove('hidden');
-                sanpcoContainer.classList.add('hidden');
-                document.getElementById('sanpco-selected').classList.add('hidden');
-
-                // Show Sinoid intro image
-                sinoidIntro.classList.remove('hidden');
-                sanpcoIntro.classList.add('hidden');
-                
-
-            } else if (card.id === 'right-card') {
-                sanpcoContainer.classList.remove('hidden');
-                document.getElementById('sanpco-selected').classList.remove('hidden');
-                sinoidContainer.classList.add('hidden');
-                document.getElementById('sinoid-selected').classList.add('hidden');
-
-                // Show SAN-PCO intro image
-                sanpcoIntro.classList.remove('hidden');
-                sinoidIntro.classList.add('hidden');
-            }
+    // Radio selection (after first click)
+    document.querySelectorAll('input[name="cell-selection"]').forEach(radio => {
+        radio.addEventListener('click', () => {
+            if (radio.id === 'acmvcm-select') showChannel('acmvcm');
+            if (radio.id === 'sanpco-select') showChannel('sanpco');
+            if (radio.id === 'miniheart-select') showChannel('miniheart');
         });
     });
 
     // Load image from given port for a gene name
-    function loadGeneImage(gene, imgElement, port, currentGeneRef) {
-        const sinoidIntro = document.getElementById('sinoid-intro');
-        const sanpcoIntro = document.getElementById('sanpco-intro');
+    function loadGeneImage(gene, imgElement, port, currentGeneRef, introEl) {
         if (!gene || gene === currentGeneRef.value) return;
         currentGeneRef.value = gene;
 
         imgElement.style.display = 'none';
         imgElement.src = '';
 
-        const url = `http://128.84.41.80:${port}/genes/${encodeURIComponent(gene)}`;
+        const url = `http://${BASE_HOST}:${port}/genes/${encodeURIComponent(gene)}`;
         imgElement.src = url;
 
         imgElement.onload = () => {
             imgElement.style.display = 'block';
-            if (port == 9027){
-                sinoidIntro.classList.add('strong_hidden');
-                document.getElementById('sinoid-selected').classList.remove('strong_hidden');
-            }
-
-            if (port == 9028){
-                sanpcoIntro.classList.add('strong_hidden');
-                document.getElementById('sanpco-selected').classList.remove('strong_hidden');
-            }
-            
-            
+            introEl.classList.add('strong_hidden');
+            imgElement.classList.remove('strong_hidden');
         };
 
         imgElement.onerror = () => {
@@ -128,17 +126,18 @@ window.addEventListener('DOMContentLoaded', function () {
         };
     }
 
-    const sinoidCurrentRef = { value: GLB_SINOID_CURRENT };
-    const sanpcoCurrentRef = { value: GLB_SANPCO_CURRENT };
-
-    sinoidSubmit.addEventListener('click', () => {
-        const gene = sinoidInput.value.trim();
-        loadGeneImage(gene, sinoidImg, 9027, sinoidCurrentRef);
+    acmvcmSubmit.addEventListener('click', () => {
+        const gene = acmvcmInput.value.trim();
+        loadGeneImage(gene, acmvcmImg, 9027, acmvcmCurrentRef, acmvcmIntro);
     });
 
     sanpcoSubmit.addEventListener('click', () => {
         const gene = sanpcoInput.value.trim();
-        console.log(gene);
-        loadGeneImage(gene, sanpcoImg, 9028, sanpcoCurrentRef);
+        loadGeneImage(gene, sanpcoImg, 9028, sanpcoCurrentRef, sanpcoIntro);
+    });
+
+    miniheartSubmit.addEventListener('click', () => {
+        const gene = miniheartInput.value.trim();
+        loadGeneImage(gene, miniheartImg, 9029, miniheartCurrentRef, miniheartIntro);
     });
 });

@@ -412,7 +412,8 @@
 
 .card-selection {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 3vw;
     margin-top: 0.5vw;
     padding-top: 4vw;
     padding-bottom: 4vw;
@@ -449,12 +450,9 @@
     background-color: rgb(133, 77, 72);
 }
 
-#left-card{
-    margin-left:320px;
-}
-
-#right-card{
-    margin-right:320px;
+#left-card, #middle-card, #right-card {
+    margin-left: 0;
+    margin-right: 0;
 }
 
 input[type="radio"]:checked + .card {

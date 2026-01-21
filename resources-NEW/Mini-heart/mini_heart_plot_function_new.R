@@ -116,9 +116,9 @@ app <- list(
   }
 )
 
-# Start server on port 9030 (new port)
+# Start server on port 9029 (new port)
 server <- startServer("0.0.0.0", 9029, app)
-cat("Mini-heart Omics server started at http://localhost:9030\n")
+cat("Mini-heart Omics server started at http://localhost:9029\n")
 
 # Keep it running
 while (TRUE) {
