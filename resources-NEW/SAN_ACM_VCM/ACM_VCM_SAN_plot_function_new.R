@@ -14,34 +14,20 @@ Combine <- readRDS("ACM_VCM_SAN_annotated.rds")
 levels(Combine) <- c("ACM","Endothelial","Epicardial","Epithelial","FB_1","FB_2",
                      "Neuronal","Neural_Crest","Proliferating","SAN","VCM")
 
-# UMAP demonstrate different cell populations based on RNA expression
-# show in the default page
-UMAPPlot(Combine,label=TRUE,label.size =5,repel = TRUE) + labs(x = 'UMAP_1', y = 'UMAP_2')
-
-UMAPPlot(Combine,label=TRUE,split.by = "orig.ident",repel = TRUE) + labs(x = 'UMAP1',y = 'UMAP2')
-
-# dotplot demonstrate the marker expression of each cell population
-# show in the default page
-DotPlot(Combine,features = c("NPPA","CDH5","WT1","EPCAM","POSTN","PDZRN4","STMN2","SOX2","TOP2A","SHOX2","MYL2")) + RotatedAxis()
-
-# Violin plot showing the expression of indicated gene
-# show after type in the search gene 
-VlnPlot(Combine,features = "SHOX2",pt.size = 0) + labs(x = '')
-
-# UMAP to demonstrate the expression of selected gene
-# show after type in the search gene 
-FeaturePlot(Combine,features = "SHOX2") + labs(x = 'UMAP_1',y = "UMAP_2")
-
-# Dotplot to demonstrate the expression of selected gene
-# show after type in the search gene 
-DotPlot(Combine,features = "SHOX2") + labs(x = 'UMAP_1', y = 'UMAP_2')
-
 # Plot generator for ACM_VCM_SAN data
 acmvcmOmics <- function(genes, png_path) {
   tryCatch({
-    p2 <- DotPlot(Combine,features = genes) + RotatedAxis() + labs(x = '',y = '')
-    p3 <- FeaturePlot(Combine,features = genes) + labs(x = 'UMAP_1',y = "UMAP_2")
+    # Violin plot showing the expression of indicated gene
+    # show after type in the search gene 
     p4 <- VlnPlot(Combine,features = genes,pt.size = 0) + labs(x = '')
+    
+    # UMAP to demonstrate the expression of selected gene
+    # show after type in the search gene 
+    p3 <- FeaturePlot(Combine,features = genes) + labs(x = 'UMAP_1',y = "UMAP_2")
+    
+    # Dotplot to demonstrate the expression of selected gene
+    # show after type in the search gene 
+    p2 <- DotPlot(Combine,features = genes) + labs(x = 'UMAP_1', y = 'UMAP_2')
 
     combined <- p2 + p3 + p4 + plot_layout(ncol = 2)
     ggsave(png_path, plot = combined, width = 15, height = 10, device = "png")

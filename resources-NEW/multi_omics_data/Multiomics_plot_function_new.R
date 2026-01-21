@@ -12,17 +12,6 @@ library(httpuv)
 # load the data
 fetal_heart <- readRDS("fetal_heart_multiomics_annotated.rds")
 
-# UMAP demonstrate different cell populations based on RNA expression
-DimPlot(fetal_heart, reduction = "umap.rna", label = TRUE, label.size = 4, repel = TRUE) + ggtitle("RNA") + labs(x = 'UMAP_1',y = 'UMAP_2')
-
-# UMAP demonstrate different cell populations based on ATAC data
-DimPlot(fetal_heart, reduction = "umap.atac.peaks",label = TRUE, label.size = 4, repel = TRUE) + ggtitle("ATAC") + labs(x = 'UMAP_1',y = 'UMAP_2')
-
-# dotplot demonstrate the marker expression of each cell population
-DefaultAssay(fetal_heart) <-'RNA'
-levels(fetal_heart) <- c('VCM','VSM','SMC','SAN','RBC','Neuronal','Myeloid','Lymphoid','Fibroblast','Epithelial','Epicardial','Endothelial','ACM')
-DotPlot(fetal_heart,features = c("MYL2","MYH11","MYBPC1","HCN4","HBG1","STMN2","CD163","CD96","PDGFRA","PAX1","WT1","CDH5","NPPA")) + RotatedAxis() + labs(x = '',y = '')
-
 # Setup fragments for ATAC coverage plots (done once)
 DefaultAssay(fetal_heart) <-'ATAC'
 frags <- Fragments(fetal_heart[['ATAC']])

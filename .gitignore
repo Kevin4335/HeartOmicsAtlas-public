@@ -15,4 +15,5 @@ resources-NEW/multi_omics_data/*/*.gz*
 resources-OLD/
 fragments-OLD/
 *.zip
-
+REFERENCE/
+resources-NEW/*/*.png

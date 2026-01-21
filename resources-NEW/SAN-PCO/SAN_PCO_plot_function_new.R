@@ -14,32 +14,20 @@ SAN_PCO <- readRDS("SAN-PCO_annotated.rds")
 levels(SAN_PCO) <- c("ACM","Endothelial","Epicardial","Epithelial","FB",
                      "Neuronal","Neural_Crest","Proliferating","SAN")
 
-# UMAP demonstrate different cell populations based on RNA expression
-# show in the default page
-UMAPPlot(SAN_PCO,label=TRUE,label.size = 4, repel = TRUE) + labs(x = "UMAP_1",y = "UMAP_2")
-
-# dotplot demonstrate the marker expression of each cell population
-# show in the default page
-DotPlot(SAN_PCO,features = c("NPPA","CDH5","WT1","EPCAM","COL1A1","STMN2","SOX2","TOP2A","SHOX2")) + RotatedAxis() + labs(x = '',y = '')
-
-# Violin plot showing the expression of indicated gene
-# show after type in the search gene 
-VlnPlot(SAN_PCO,features = "STMN2",pt.size = 0) + labs(x = "")
-
-# UMAP to demonstrate the expression of selected gene
-# show after type in the search gene 
-FeaturePlot(SAN_PCO,features = "STMN2") + labs(x = "UMAP_1",y = "UMAP_2")
-
-# Dotplot to demonstrate the expression of selected gene
-# show after type in the search gene 
-DotPlot(SAN_PCO,features = "STMN2") + labs(x = "",y = "")
-
 # Plot generator for SAN_PCO data
 sanpcoOmics <- function(genes, png_path) {
   tryCatch({
-    p2 <- DotPlot(SAN_PCO,features = genes) + labs(x = "",y = "")
-    p3 <- FeaturePlot(SAN_PCO,features = genes) + labs(x = "UMAP_1",y = "UMAP_2")
+    # Violin plot showing the expression of indicated gene
+    # show after type in the search gene 
     p4 <- VlnPlot(SAN_PCO,features = genes,pt.size = 0) + labs(x = "")
+    
+    # UMAP to demonstrate the expression of selected gene
+    # show after type in the search gene 
+    p3 <- FeaturePlot(SAN_PCO,features = genes) + labs(x = "UMAP_1",y = "UMAP_2")
+    
+    # Dotplot to demonstrate the expression of selected gene
+    # show after type in the search gene 
+    p2 <- DotPlot(SAN_PCO,features = genes) + labs(x = "",y = "")
 
     combined <- p2 + p3 + p4 + plot_layout(ncol = 2)
     ggsave(png_path, plot = combined, width = 15, height = 10, device = "png")

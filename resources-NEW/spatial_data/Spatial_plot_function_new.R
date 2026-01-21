@@ -11,41 +11,10 @@ library(jsonlite)
 # load the data
 fetal_heart <- readRDS("fetal_heart_0103_16um_annotated.rds")
 
-# UMAP demonstrate different cell populations
-DimPlot(fetal_heart,reduction = "umap.016um",label = TRUE, repel = TRUE) + labs(x = "UMAP1",y = "UMAP2")
-
-# Spatial plot demonstrate different cell populations
-mycols <- c(
-  "orange",
-  "darkgreen",
-  "#F781BF", 
-  "#FF7F00", 
-  "#984EA3",
-  "#AEC6CF",
-  "#E41A1C",
-  "#A65628" 
-)
-SpatialDimPlot(fetal_heart,label = TRUE,label.size = 3,repel = TRUE) + scale_fill_manual(values = mycols) + theme_void()
-
-# Spatial plot to show the marker expression of each cluster using Dotplot
-DotPlot(fetal_heart,features = c("MYL7","VWF","DCN","SPP1","PLP1","HBG1","SHOX2","MYH11")) + RotatedAxis() + labs(x = '',y='')
-
-#  Spatial plot showing the expression of indicated gene
-SpatialFeaturePlot(fetal_heart,features = c("SHOX2"),alpha = c(0.1,1),pt.size.factor = 5)
-
-# UMAP plot showing the expression of indicated gene
-FeaturePlot(fetal_heart,features = c("SHOX2")) + labs(x='UMAP1',y='UMAP2')
-
-# Violin plot showing the expression of indicated gene
-VlnPlot(fetal_heart,features = c("SHOX2"),pt.size = 0) + labs(x='')
-
-# Dot plot showing the expression of indicated gene
-DotPlot(fetal_heart,features = c("SHOX2")) + RotatedAxis() + labs(x = '',y = '')
-
 # Function to generate plots for a given gene and save to PNG
 spatialOmics <- function(genes, png_path) {
   tryCatch({
-    # Spatial plot showing the expression of indicated gene
+    #  Spatial plot showing the expression of indicated gene
     p3 <- SpatialFeaturePlot(fetal_heart,features = genes,alpha = c(0.1,1),pt.size.factor = 5)
     
     # UMAP plot showing the expression of indicated gene
@@ -56,7 +25,7 @@ spatialOmics <- function(genes, png_path) {
     
     # Dot plot showing the expression of indicated gene
     p6 <- DotPlot(fetal_heart,features = genes) + RotatedAxis() + labs(x = '',y = '')
-    
+
     combined_plot <- p3 + p4 + p5 + p6 + plot_layout(ncol = 2)
     ggsave(png_path, plot = combined_plot, width = 15, height = 10, device = "png")
     cat("Saved image to", png_path, "\n")

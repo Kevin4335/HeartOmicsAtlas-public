@@ -14,32 +14,20 @@ heart <- readRDS("mini_heart_annotated.rds")
 levels(heart) <- c("ACM","Endothelial","Epicardial","Epithelial","FB",
                    "Neuronal","Proliferating","SAN","VCM")
 
-# UMAP demonstrate different cell populations based on RNA expression
-# show in the default page
-UMAPPlot(heart,label=TRUE,label.size =5,repel = TRUE) + labs(x = 'UMAP_1', y = 'UMAP_2')
-
-# dotplot demonstrate the marker expression of each cell population
-# show in the default page
-DotPlot(heart,features = c("NPPA","CDH5","WT1","EPCAM","DCN","STMN2","TOP2A","SHOX2","HEY2")) + RotatedAxis() + labs(x = '',y = '')
-
-# Violin plot showing the expression of indicated gene
-# show after type in the search gene 
-VlnPlot(heart,features = "SHOX2",pt.size = 0) + labs(x = '')
-
-# UMAP to demonstrate the expression of selected gene
-# show after type in the search gene 
-FeaturePlot(heart,features = "SHOX2") + labs(x = 'UMAP_1',y = "UMAP_2")
-
-# Dotplot to demonstrate the expression of selected gene
-# show after type in the search gene 
-DotPlot(heart,features = "SHOX2") + labs(x = 'UMAP_1', y = 'UMAP_2')
-
 # Plot generator for Mini-heart data
 miniHeartOmics <- function(genes, png_path) {
   tryCatch({
-    p2 <- DotPlot(heart,features = genes) + RotatedAxis() + labs(x = '',y = '')
-    p3 <- FeaturePlot(heart,features = genes) + labs(x = 'UMAP_1',y = "UMAP_2")
+    # Violin plot showing the expression of indicated gene
+    # show after type in the search gene 
     p4 <- VlnPlot(heart,features = genes,pt.size = 0) + labs(x = '')
+    
+    # UMAP to demonstrate the expression of selected gene
+    # show after type in the search gene 
+    p3 <- FeaturePlot(heart,features = genes) + labs(x = 'UMAP_1',y = "UMAP_2")
+    
+    # Dotplot to demonstrate the expression of selected gene
+    # show after type in the search gene 
+    p2 <- DotPlot(heart,features = genes) + labs(x = 'UMAP_1', y = 'UMAP_2')
 
     combined <- p2 + p3 + p4 + plot_layout(ncol = 2)
     ggsave(png_path, plot = combined, width = 15, height = 10, device = "png")
