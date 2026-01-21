@@ -21,11 +21,17 @@ p2 <- DimPlot(fetal_heart, reduction = "umap.atac.peaks",label = TRUE, label.siz
 
 # dotplot demonstrate the marker expression of each cell population
 DefaultAssay(fetal_heart) <-'RNA'
-levels(fetal_heart) <- c('VCM','VSM','SMC','SAN','RBC','Neuronal','Myeloid','Lymphoid','Fibroblast','Epithelial','Epicardial','Endothelial','ACM')
+# Set levels - use tryCatch to handle if some levels don't exist
+tryCatch({
+  levels(fetal_heart) <- c('VCM','VSM','SMC','SAN','RBC','Neuronal','Myeloid','Lymphoid','Fibroblast','Epithelial','Epicardial','Endothelial','ACM')
+}, error = function(e) {
+  # If setting levels fails, just use existing levels
+  cat("Note: Could not set all desired levels, using existing levels\n")
+})
 p3 <- DotPlot(fetal_heart,features = c("MYL2","MYH11","MYBPC1","HCN4","HBG1","STMN2","CD163","CD96","PDGFRA","PAX1","WT1","CDH5","NPPA")) + RotatedAxis() + labs(x = '',y = '')
 
-# Combine plots: 2 on top, 1 on bottom
-combined <- (p1 + p2) / p3
+# Combine plots: 2 on top, 1 on bottom (bottom plot same width as one top plot)
+combined <- (p1 + p2) / (p3 + plot_spacer())
 
 # Save to PNG in the same directory
 ggsave("Multiomics_default_plots.png", plot = combined, width = 20, height = 15, device = "png")

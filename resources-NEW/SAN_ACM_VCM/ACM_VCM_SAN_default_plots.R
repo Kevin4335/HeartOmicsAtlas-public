@@ -25,8 +25,8 @@ p2 <- UMAPPlot(Combine,label=TRUE,split.by = "orig.ident",repel = TRUE) + labs(x
 # show in the default page
 p3 <- DotPlot(Combine,features = c("NPPA","CDH5","WT1","EPCAM","POSTN","PDZRN4","STMN2","SOX2","TOP2A","SHOX2","MYL2")) + RotatedAxis()
 
-# Combine plots: 2 on top, 1 on bottom
-combined <- (p1 + p2) / p3
+# Combine plots: 2 on top, 1 on bottom (bottom plot same width as one top plot)
+combined <- (p1 + p2) / (p3 + plot_spacer())
 
 # Save to PNG in the same directory
 ggsave("ACM_VCM_SAN_default_plots.png", plot = combined, width = 20, height = 15, device = "png")

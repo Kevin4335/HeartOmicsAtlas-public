@@ -4,12 +4,14 @@ library(ggplot2)
 library(patchwork)
 library(dplyr)
 library(hdf5r)
-library(CellChat)
 library(httpuv)
 library(jsonlite)
 
 # load the data
 fetal_heart <- readRDS("fetal_heart_0103_16um_annotated.rds")
+
+# Update Seurat object to ensure compatibility with spatial plotting
+fetal_heart <- UpdateSeuratObject(fetal_heart)
 
 # Function to generate plots for a given gene and save to PNG
 spatialOmics <- function(genes, png_path) {

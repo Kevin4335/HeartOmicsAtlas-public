@@ -13,9 +13,9 @@ echo "Generating SAN-PCO default plots..."
 cd resources-NEW/SAN-PCO && Rscript SAN_PCO_default_plots.R && cd ../..
 
 echo "Generating Spatial default plots..."
-cd resources-NEW/spatial_data && Rscript Spatial_default_plots.R && cd ../..
+cd /home/ubuntu/HeartOmics/resources-NEW/spatial_data && Rscript Spatial_default_plots.R && cd /home/ubuntu/HeartOmics
 
 echo "Generating Multiomics default plots..."
-cd resources-NEW/multi_omics_data && Rscript Multiomics_default_plots.R && cd ../..
+cd /home/ubuntu/HeartOmics/resources-NEW/multi_omics_data && Rscript Multiomics_default_plots.R && cd /home/ubuntu/HeartOmics
 
 echo "All default plots generated!"
