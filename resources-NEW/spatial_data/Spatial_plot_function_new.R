@@ -10,14 +10,22 @@ library(jsonlite)
 # load the data
 fetal_heart <- readRDS("fetal_heart_0103_16um_annotated.rds")
 
-# Update Seurat object to ensure compatibility with spatial plotting
-fetal_heart <- UpdateSeuratObject(fetal_heart)
+# Update Seurat object - critical for spatial plotting
+# This may cause S4SXP error, but it's required for SpatialFeaturePlot to work
+tryCatch({
+  fetal_heart <- UpdateSeuratObject(fetal_heart)
+  cat("Seurat object updated successfully\n")
+}, error = function(e) {
+  cat("Warning: UpdateSeuratObject failed:", e$message, "\n")
+  cat("Will attempt to use object as-is\n")
+})
 
 # Function to generate plots for a given gene and save to PNG
 spatialOmics <- function(genes, png_path) {
   tryCatch({
     #  Spatial plot showing the expression of indicated gene
-    p3 <- SpatialFeaturePlot(fetal_heart,features = genes,alpha = c(0.1,1),pt.size.factor = 5)
+    # Match original script exactly with pt.size.factor = 5
+    p3 <- SpatialFeaturePlot(fetal_heart,features = genes,alpha = c(0.1,1), pt.size.factor = 5)
     
     # UMAP plot showing the expression of indicated gene
     p4 <- FeaturePlot(fetal_heart,features = genes) + labs(x='UMAP1',y='UMAP2')

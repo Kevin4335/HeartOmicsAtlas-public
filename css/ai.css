@@ -531,15 +531,11 @@ main {
     height: calc(var(--actual-vh) - 14.125vw);
     max-height: 60.5vw;
     width: 80%;
-    display: grid;
+    display: flex;
+    justify-content: space-between;
     font-size: 1.05vw;
-    grid-column-gap: 5%;
-    grid-template-rows: 4vw 4vw;
-    padding-top: calc(min(var(--actual-vh) * 0.7 - 26.125vw * 0.7, 50.5vw * 0.7));
-    /* padding-top: calc(var(--actual-vh) * 0.7 - 26.125vw * 0.7); */
-    /* padding-top: calc(50.5vw * 0.7); */
+    padding-top: calc(min(var(--actual-vh) * 0.75 - 26.125vw * 0.75, 50.5vw * 0.75));
     line-height: 1.5vw;
-    grid-row-gap: 2vw;
     margin-left: 10%;
     margin-right: 10%;
 }
@@ -547,24 +543,26 @@ main {
 
 
 #chat-rcmd p {
-    font-size: inherit;
-    padding: 1vw 1.2vw;
-    border-radius: 1.2vw;
+    padding: 0.5vw;
+    padding-top: 0.8vw;
+    padding-bottom: 0.8vw;
+    border-radius: 1vw;
     background-color: rgb(255, 255, 255);
+    font-size: 1vw;
+    flex: 1;
+    margin: 5px 10px;
+    text-align: center;
+    border: 3px solid #ffffff;
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.3);
     line-height: 1.4;
-    text-align: left;
     font-family: inherit;
-    font-size: 0.715vw;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-    border: 0.1vw solid #f0f0f0;
     cursor: pointer;
 }
 
 #chat-rcmd p strong {
     display: block;
     font-weight: 600;
-    font-size: 0.95vw;
+    font-size: inherit;
     margin-bottom: 0.4vw;
     color: #780000;
     letter-spacing: 0.02em;
@@ -575,16 +573,8 @@ main {
 }
 
 #chat-rcmd p:hover {
-    background-color: #f8f8f8;
+    background-color: #e8e8e8;
     cursor: pointer;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-color: #780000;
-}
-
-#chat-rcmd p:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 

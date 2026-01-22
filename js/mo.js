@@ -42,10 +42,13 @@ window.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('back-main').addEventListener('click', function () {
         GLB_CURRENT = '';
+        const selectedImg = document.getElementById('selected');
+        // Remove error handler before clearing src to prevent error on navigation
+        selectedImg.onerror = null;
         document.getElementById('static-img').style.display = 'flex';
         document.getElementById('static-img-2').style.display = 'flex';
-        document.getElementById('selected').src = '';
-        document.getElementById('selected').style.display = 'none';
+        selectedImg.src = '';
+        selectedImg.style.display = 'none';
         document.getElementById('selected-right').style.display = 'none';
         document.getElementById('back-main').style.display = 'none';
     });

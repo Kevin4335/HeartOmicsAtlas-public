@@ -332,7 +332,7 @@ function clear_history() {
     DISPLAYING_MESSAGES = [];
     render_messages();
     document.getElementById('chat-messages').style.display = 'none';
-    document.getElementById('chat-rcmd').style.display = 'grid';
+    document.getElementById('chat-rcmd').style.display = 'flex';
 }
 
 window.addEventListener('DOMContentLoaded', function() {

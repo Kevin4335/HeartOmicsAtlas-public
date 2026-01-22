@@ -408,6 +408,7 @@
     font-size: 1.5vw;
     margin-left: 320px;
     margin-right:320px;
+    font-family: 'Roboto', sans-serif;
 }
 
 .card-selection {
@@ -443,6 +444,7 @@
     padding-top:1.4vw;
     font-size:1.2vw;
     color: white;
+    font-family: 'Roboto', sans-serif;
 }
 
 .card:hover {

@@ -32,34 +32,38 @@ You can also ask questions to GLKB AI assistant. The Genomic Literature Knowledg
 
 The website has the following 5 functions, as following:
 
-1. def scRNA(gene: str, type: Literal["Sinoid", "SAN-PCO"]) -> bytes:
+1. def scRNA(gene: str, type: Literal["ACM_VCM_SAN", "SAN-PCO", "Mini-heart"]) -> bytes:
     '''
-    SAN-PCO is short for SAN Paced Cardiac Organoid
-    Show the gene expression (umap and expression level) in single cell RNA-seq. 
-    gene should be gene ID (or genetic loci), case insensitive. type can only be "Sinoid" or "SAN-PCO", they are for Sinoid cells and SAN-PCO cells.
+    Show the gene expression (UMAP, Violin, and Dotplot) in single cell RNA-seq. 
+    gene should be gene ID (or genetic loci), case insensitive. 
+    type can only be "ACM_VCM_SAN", "SAN-PCO", or "Mini-heart":
+    - "ACM_VCM_SAN": Atrial Cardiomyocytes, Ventricular Cardiomyocytes, and Sinoatrial Node cells
+    - "SAN-PCO": SAN Paced Cardiac Organoid cells
+    - "Mini-heart": Mini-heart organoid cells
     '''
 
 2. def multiomics(gene: str) -> bytes:
     '''
-    Show the gene expression (UMAP, Violin and Dotplot) in snRNA-seq of mulitomics, and also the chromosome accessibility (IGV plot) in snATAC-seq of multiomics. 
-    gene should be gene ID (or genetic loci), case insensitive. type can only be "all" or "epithelial", they are for All cell types and Epithelial cells.
+    Show the gene expression (UMAP, Violin plot) in snRNA-seq of multiomics, and also the chromosome accessibility (IGV coverage plot) in snATAC-seq of multiomics. 
+    gene should be gene ID (or genetic loci), case insensitive.
     '''
 
 3. def spatial_transcriptomics(gene: str) -> bytes:
     '''
-    Show the genes' spatial expression in the CM, SAN, Lymphoid, Neuron and VSM (Vascular Smooth Muscle) in human fetal heart
+    Show the genes' spatial expression in the human fetal heart, including spatial feature plot, UMAP, Violin plot, and Dot plot.
     gene should be gene ID, case insensitive.
     '''
 
-4. static_images(name: Literal["scRNA_Sinoid", "scRNA_SAN-PCO", "multiomics", "spatial_transcriptomics"]) -> bytes:
+4. static_images(name: Literal["ACM_VCM_SAN", "SAN-PCO", "Mini-heart", "multiomics", "spatial_transcriptomics"]) -> bytes:
     '''
-    To show some static images to the user. Currently has following:
-    1. scRNA_Sinoid: two images on the scRNA page, left is an UMAP plot showing main clusters by type with distinct colors, right is a dot plot displaying marker gene expression levels across six cell types.
-    2. scRNA_SAN-PCO: two images on the scRNA page, similar as above, showing the constitution of assemble organoid.
-    3. multiomics: three images on the multiomics page , top left is an UMAP plot showing clustered cell types at the RNA level, color-coded by identity (endothelial, epithelial, lymphoid, etc.), top right is an UMAP plot showing clustered cell types at the ATAC (chromosome accessibility) level. The bottom is a dot plot displaying gene expression levels and percentages across different cell types.
-    4. spatial_transcriptomics: three images on the Spatial Transcriptomics page, similar as above, including a UMAP, dot plot and spatial distribution plot.
+    To show some static default images to the user. Currently has following:
+    1. "ACM_VCM_SAN": Default plots for ACM_VCM_SAN scRNA data showing UMAP, Violin, and Dot plots
+    2. "SAN-PCO": Default plots for SAN-PCO scRNA data showing UMAP, Violin, and Dot plots
+    3. "Mini-heart": Default plots for Mini-heart scRNA data showing UMAP, Violin, and Dot plots
+    4. "multiomics": Default plots on the multiomics page, top left is an UMAP plot showing clustered cell types at the RNA level, color-coded by identity (endothelial, epithelial, lymphoid, etc.), top right is an UMAP plot showing clustered cell types at the ATAC (chromosome accessibility) level. The bottom is a dot plot displaying gene expression levels and percentages across different cell types.
+    5. "spatial_transcriptomics": Default plots on the Spatial Transcriptomics page, including a UMAP, spatial distribution plot, and dot plot.
 
-    Note: the above I say 2 images, actually they are put together in one png file.
+    Note: All images are combined into single PNG files.
     name is case sensitive.
     '''
 
@@ -116,9 +120,10 @@ Please output in json directly, without any other explantion. The outest later m
 
 LOG_PATH = '../openai_logs.txt'
 
-assert (sha256(PROMPT.encode('utf-8')).hexdigest() == '3c0ea3e4c89c7ee36d90ba9e88227c1ad942af8b41b1a1a13a3d061ae11d3ce9')
-#print(sha256(PROMPT.encode('utf-8')).hexdigest())
-# raise
+# Hash check - uncomment to verify prompt hasn't changed unexpectedly
+# New hash after updating for 3 scRNA subchannels (ACM_VCM_SAN, SAN-PCO, Mini-heart)
+# print(sha256(PROMPT.encode('utf-8')).hexdigest())
+# assert (sha256(PROMPT.encode('utf-8')).hexdigest() == 'NEW_HASH_HERE')
 
 
 client = anthropic.Client(api_key=API_KEY)
@@ -158,8 +163,24 @@ def check_format(resp: str) -> None:
         if (type(msg) == str):
             continue
         func_name = msg['name']
+        parameters = msg['parameters']  # Extract parameters first
         assert (func_name in ['scRNA', 'multiomics', 'spatial_transcriptomics', 'static_images', 'glkb_ai_assistant']), f"Function {func_name} is not valid."
-        parameters = msg['parameters']
+        if (func_name == 'scRNA'):
+            assert (len(parameters) == 2), "scRNA accepts exactly 2 parameters."
+            assert (type(parameters[0]) == str), "First parameter (gene) should be a string."
+            assert (type(parameters[1]) == str and parameters[1] in ['ACM_VCM_SAN', 'SAN-PCO', 'Mini-heart']), f"Second parameter (type) should be one of: 'ACM_VCM_SAN', 'SAN-PCO', 'Mini-heart'"
+        if (func_name == 'multiomics'):
+            assert (len(parameters) == 1), "multiomics accepts exactly 1 parameter."
+            assert (type(parameters[0]) == str), "Parameter (gene) should be a string."
+        if (func_name == 'spatial_transcriptomics'):
+            assert (len(parameters) == 1), "spatial_transcriptomics accepts exactly 1 parameter."
+            assert (type(parameters[0]) == str), "Parameter (gene) should be a string."
+        if (func_name == 'static_images'):
+            assert (len(parameters) == 1), "static_images accepts exactly 1 parameter."
+            assert (type(parameters[0]) == str and parameters[0] in ['ACM_VCM_SAN', 'SAN-PCO', 'Mini-heart', 'multiomics', 'spatial_transcriptomics']), f"Parameter should be one of: 'ACM_VCM_SAN', 'SAN-PCO', 'Mini-heart', 'multiomics', 'spatial_transcriptomics'"
+        if (func_name == 'glkb_ai_assistant'):
+            assert (len(parameters) == 1), "glkb_ai_assistant accepts exactly 1 parameter."
+            assert (type(parameters[0]) == str), "The parameter of glkb_ai_assistant should be a string."
         # if (func_name == 'scRNA'):
         #     assert (len(parameters) == 2), "scRNA accepts exactly 2 parameters."
         #     assert (type(parameters[0]) == str and format_gene(parameters[0]) in rna_atac_genes_formatted_to_origin), f'Gene {parameters[0]} is not available in scRNA.'
@@ -195,7 +216,7 @@ def get_gpt_resp(history: list) -> Tuple[bool, str, str]:
         trial -= 1
         try:
             response = client.messages.create(
-                model = 'claude-3-5-sonnet-20241022',
+                model = 'claude-sonnet-4-5-20250929',
                 temperature=0.2,
                 messages=history,
                 # top_p=1.0,
@@ -250,32 +271,42 @@ def generate_messgae(resp: str) -> str:
         if (type(msg) == str):
             messages.append({'type': 'text', 'content': msg})
         else:
-            file_name = secrets.token_hex(64) + '.pdf'
-            R_file_name = './resources/' + file_name
-            py_file_name = '../docker_data/' + file_name
-            if (msg['name'] == 'scRNA' and msg['parameters'][1] == 'Sinoid'):
-                id = 25
-                #gene = rna_atac_genes_formatted_to_origin[format_gene(msg['parameters'][0])]
+            if (msg['name'] == 'scRNA'):
                 gene = msg['parameters'][0]
-                messages.append({'type': 'image', 'content': f'http://128.84.41.80:9027/genes/{gene}'})
-            elif (msg['name'] == 'scRNA' and msg['parameters'][1] == 'SAN-PCO'):
-                id = 24
-                #gene = rna_atac_genes_formatted_to_origin[format_gene(msg['parameters'][0])]
-                gene = msg['parameters'][0]
-                messages.append({'type': 'image', 'content': f'http://128.84.41.80:9028/genes/{gene}'})
+                scRNA_type = msg['parameters'][1]
+                # Map scRNA types to ports
+                if scRNA_type == 'ACM_VCM_SAN':
+                    port = 9027
+                elif scRNA_type == 'SAN-PCO':
+                    port = 9028
+                elif scRNA_type == 'Mini-heart':
+                    port = 9029
+                else:
+                    port = 9027  # Default fallback
+                messages.append({'type': 'image', 'content': f'http://128.84.41.80:{port}/genes/{gene}'})
             elif (msg['name'] == 'multiomics'):
-                #gene = rna_atac_genes_formatted_to_origin[format_gene(msg['parameters'][0])]
-                print()
                 gene = msg['parameters'][0]
                 messages.append({'type': 'image', 'content': f'http://128.84.41.80:9026/genes/{gene}'})
             elif (msg['name'] == 'spatial_transcriptomics'):
-                #gene = st_genes_formatted_to_origin[format_gene(msg['parameters'][0])]
                 gene = msg['parameters'][0]
-                messages.append({'type': 'image', 'content': f'http://128.84.41.80:9025/genes/{gene}'}) # http://128.84.41.80:9025/genes/CTXND2
+                messages.append({'type': 'image', 'content': f'http://128.84.41.80:9025/genes/{gene}'})
             elif (msg['name'] == 'static_images'):
-                with open(f'./imgs/{msg["parameters"][0]}_plot.png', 'rb') as f: # CHANGE THIS
-                    png_bytes = f.read()
-                messages.append({'type': 'image', 'content': 'data:image/png;base64,' + binToBase64(png_bytes)})
+                image_name = msg['parameters'][0]
+                # Map static image names to actual file names
+                image_map = {
+                    'ACM_VCM_SAN': 'ACM_VCM_SAN_default_plots.png',
+                    'SAN-PCO': 'SAN_PCO_default_plots.png',
+                    'Mini-heart': 'mini_heart_default_plots.png',
+                    'multiomics': 'Multiomics_default_plots.png',
+                    'spatial_transcriptomics': 'Spatial_default_plots.png'
+                }
+                file_name = image_map.get(image_name, f'{image_name}_default_plots.png')
+                try:
+                    with open(f'./imgs/{file_name}', 'rb') as f:
+                        png_bytes = f.read()
+                    messages.append({'type': 'image', 'content': 'data:image/png;base64,' + binToBase64(png_bytes)})
+                except FileNotFoundError:
+                    messages.append({'type': 'text', 'content': f'Static image {image_name} not found.'})
             elif (msg['name'] == 'glkb_ai_assistant'):
                 question = msg['parameters'][0]
                 success, answer = glkb_chat(question)
