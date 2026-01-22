@@ -16,7 +16,7 @@ import traceback
 import secrets
 import openai
 from config import API_KEY
-
+from config import CHAT_KEY
 __all__ = ['process_ai_chat']
 
 
@@ -250,7 +250,7 @@ def get_gpt_resp(history: list) -> Tuple[bool, str, str]:
 
 def glkb_chat(question: str) -> tuple[bool, str]:
     try:
-        client = openai.OpenAI(base_url='http://104.187.142.167:40682/v1', api_key='123456')
+        client = openai.OpenAI(base_url='http://104.187.142.167:40682/v1', api_key=CHAT_KEY)
         response = client.chat.completions.create(
             model='my-model',
             messages=[
