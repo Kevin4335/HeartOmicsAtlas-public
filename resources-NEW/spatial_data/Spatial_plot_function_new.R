@@ -7,34 +7,49 @@ library(hdf5r)
 library(httpuv)
 library(jsonlite)
 
+#### example genes to list in the search panel
+#### SHOX2, MYH11, MYL7, PLP1
+
 # load the data
 fetal_heart <- readRDS("fetal_heart_0103_16um_annotated.rds")
-
-# Update Seurat object - critical for spatial plotting
-# This may cause S4SXP error, but it's required for SpatialFeaturePlot to work
-tryCatch({
-  fetal_heart <- UpdateSeuratObject(fetal_heart)
-  cat("Seurat object updated successfully\n")
-}, error = function(e) {
-  cat("Warning: UpdateSeuratObject failed:", e$message, "\n")
-  cat("Will attempt to use object as-is\n")
-})
+fetal_heart <- RenameIdents(fetal_heart, 'EC' = 'Endothelial','FB' = 'Fibroblast')
+fetal_heart$celltype <- Idents(fetal_heart)
+levels(fetal_heart) <- c("ACM","Endothelial","Fibroblast","Macrophages","Neuronal",'RBC',"SAN","SMC")
 
 # Function to generate plots for a given gene and save to PNG
+# Spatial plot showing the expression of indicated gene - first plot when search for specific gene
+# UMAP plot showing the expression of indicated gene - second plot when search for specific gene
+# Violin plot showing the expression of indicated gene - third plot when search for specific gene
+# Dot plot showing the expression of indicated gene - fourth plot when search for specific gene
 spatialOmics <- function(genes, png_path) {
   tryCatch({
-    #  Spatial plot showing the expression of indicated gene
-    # Match original script exactly with pt.size.factor = 5
-    p3 <- SpatialFeaturePlot(fetal_heart,features = genes,alpha = c(0.1,1), pt.size.factor = 5)
-    
+    # Spatial plot showing the expression of indicated gene
+    p3 <- SpatialFeaturePlot(fetal_heart,features = c(genes),alpha = c(0.1,1),pt.size.factor = 5) +
+      theme(legend.text = element_text(size = 15),
+            legend.title = element_text(size = 18,vjust = 0.8))
+
     # UMAP plot showing the expression of indicated gene
-    p4 <- FeaturePlot(fetal_heart,features = genes) + labs(x='UMAP1',y='UMAP2')
-    
+    p4 <- FeaturePlot(fetal_heart,features = c(genes)) + labs(x='UMAP1',y='UMAP2')+
+      theme(legend.text = element_text(size = 16),
+            axis.text.x = element_text(size = 20),
+            axis.text.y = element_text(size = 20),
+            axis.title.x = element_text(size = 20),
+            axis.title.y = element_text(size = 20))
+
     # Violin plot showing the expression of indicated gene
-    p5 <- VlnPlot(fetal_heart,features = genes,pt.size = 0) + labs(x='')
-    
+    p5 <- VlnPlot(fetal_heart,features = c(genes),pt.size = 0) + labs(x='') +
+      theme(plot.title = element_text(size = 20,hjust = 0.5),
+            legend.text = element_text(size = 16),
+            axis.text.x = element_text(size = 20),
+            axis.text.y = element_text(size = 20),
+            axis.title.x = element_text(size = 20),
+            axis.title.y = element_text(size = 20))
+
     # Dot plot showing the expression of indicated gene
-    p6 <- DotPlot(fetal_heart,features = genes) + RotatedAxis() + labs(x = '',y = '')
+    p6 <- DotPlot(fetal_heart,features = c(genes)) + labs(x = '',y = '')+
+      theme(axis.text.x = element_text(size = 16),
+            axis.text.y = element_text(size = 16)) +
+      RotatedAxis()
 
     combined_plot <- p3 + p4 + p5 + p6 + plot_layout(ncol = 2)
     ggsave(png_path, plot = combined_plot, width = 15, height = 10, device = "png")
@@ -59,7 +74,7 @@ app <- list(
 
     # Serve full gene list at /genes
     if (url == "/genes") {
-      gene_list <- rownames(fetal_heart)  # ALL genes
+      gene_list <- rownames(fetal_heart)
       response_body <- toJSON(gene_list, auto_unbox = TRUE)
       return(list(
         status = 200L,
@@ -76,7 +91,6 @@ app <- list(
     if (grepl("^/genes/", url)) {
       gene_name <- sub("^/genes/", "", url)
 
-      # Validate gene exists
       if (!(gene_name %in% rownames(fetal_heart))) {
         return(list(
           status = 404L,
@@ -88,11 +102,8 @@ app <- list(
         ))
       }
 
-      # Generate temp file path for PNG
       png_file <- tempfile(fileext = ".png")
       spatialOmics(gene_name, png_file)
-
-      # Read PNG file as raw binary
       png_data <- readBin(png_file, what = "raw", n = file.info(png_file)$size)
 
       return(list(
@@ -106,7 +117,6 @@ app <- list(
       ))
     }
 
-    # Otherwise, treat as hex JSON fallback
     json_data <- hex_to_string(substr(url, 2, nchar(url)))
     data <- fromJSON(json_data)
 
@@ -132,7 +142,6 @@ app <- list(
 server <- startServer("0.0.0.0", 9025, app)
 cat("Server started on http://localhost:9025\n")
 
-# Keep it running
 while (TRUE) {
   service()
   Sys.sleep(0.001)
