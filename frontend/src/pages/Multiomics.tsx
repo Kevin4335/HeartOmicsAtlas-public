@@ -1,5 +1,13 @@
-import { Typography } from "@mui/material";
+import GeneImagePage from "./GeneImagePage";
+import stDefault from "../assets/imgs/Multiomics_default_plots.png";
 
-export default function Multiomics() {
-  return <Typography variant="h4">Multiomics</Typography>;
+export default function SpatialTranscriptomics() {
+  return (
+    <GeneImagePage
+      title="Multiomics"
+      baseUrl="http://128.84.41.80:9026"
+      pathPrefix="/genes"
+      defaultImageSrc={stDefault}
+    />
+  );
 }
