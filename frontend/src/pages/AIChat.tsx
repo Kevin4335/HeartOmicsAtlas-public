@@ -7,7 +7,6 @@ import {
   Card,
   CardContent,
   Container,
-  Grid,
   IconButton,
   List,
   ListItem,
@@ -187,14 +186,13 @@ export default function AIChat() {
         data = (await res.json()) as BackendResponse;
       }
 
-      const processed: DisplayMessage[] = (data.messages || []).map((m) => {
+      const processed: DisplayMessage[] = (data.messages || []).map((m): DisplayMessage => {
         if (m.type === "image") return { type: "image", content: m.content };
         return { type: "text", content: m.content };
       });
 
       // Replace the "Loading..." message by rebuilding final list from prior stable state.
-      // Use messages (state) + userMsg + processed (not nextDisplay, because nextDisplay included Loading).
-      const finalMessages = [...messages, userMsg, ...processed];
+      const finalMessages: DisplayMessage[] = [...messages, userMsg, ...processed];
       setMessages(finalMessages);
       localStorage.setItem(LS_DISPLAY, JSON.stringify(finalMessages));
 
@@ -205,7 +203,8 @@ export default function AIChat() {
       const msg = e instanceof Error ? e.message : "Unknown error";
       setError(msg);
       // Remove the loading message, keep the user message
-      const finalMessages = [...messages, userMsg, { type: "text", content: `Error: ${msg}` }];
+      const errMsg: DisplayMessage = { type: "text", content: `Error: ${msg}` };
+      const finalMessages: DisplayMessage[] = [...messages, userMsg, errMsg];
       setMessages(finalMessages);
       localStorage.setItem(LS_DISPLAY, JSON.stringify(finalMessages));
     } finally {
@@ -292,9 +291,16 @@ export default function AIChat() {
                   Try one of these prompts:
                 </Typography>
 
-                <Grid container spacing={2} justifyContent="center">
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 2,
+                    justifyContent: "center",
+                  }}
+                >
                   {prompts.map((p, idx) => (
-                    <Grid item xs={12} sm={6} key={idx}>
+                    <Box key={idx} sx={{ width: { xs: "100%", sm: "calc(50% - 8px)" } }}>
                       <Card
                         onClick={() => handlePromptClick(p)}
                         sx={{
@@ -308,9 +314,9 @@ export default function AIChat() {
                           <Typography>{p}</Typography>
                         </CardContent>
                       </Card>
-                    </Grid>
+                    </Box>
                   ))}
-                </Grid>
+                </Box>
               </Box>
             ) : (
               <List sx={{ p: 0 }}>

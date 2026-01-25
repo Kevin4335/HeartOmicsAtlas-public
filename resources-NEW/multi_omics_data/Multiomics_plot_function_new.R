@@ -16,6 +16,21 @@ library(httpuv)
 fetal_heart <- readRDS("fetal_heart_multiomics_annotated.rds")
 levels(fetal_heart) <- c('ACM','Endothelial','Epicardial','Epithelial','Fibroblast','Lymphoid','Myeloid','Neuronal_1','Neuronal_2','RBC','SAN','SMC','VCM')
 
+# Set fragment paths for ATAC once at load (avoids "Cells already present in a fragment object"
+# when re-assigning or sharing fragments across assays on every request).
+DefaultAssay(fetal_heart) <- 'ATAC'
+frags <- Fragments(fetal_heart[['ATAC']])
+Fragments(fetal_heart[['ATAC']]) <- NULL
+newpath1 <- "3655/atac_fragments.tsv.gz"
+newpath2 <- "3675/atac_fragments.tsv.gz"
+newpath3 <- "7668/atac_fragments.tsv.gz"
+newpath4 <- "3688/atac_fragments.tsv.gz"
+frags[[1]] <- UpdatePath(frags[[1]], new.path = newpath1)
+frags[[2]] <- UpdatePath(frags[[2]], new.path = newpath2)
+frags[[3]] <- UpdatePath(frags[[3]], new.path = newpath3)
+frags[[4]] <- UpdatePath(frags[[4]], new.path = newpath4)
+Fragments(fetal_heart[['ATAC']]) <- frags
+
 # Function to generate MultiOmics plots for a gene
 multiOmics <- function(gene, png_path) {
   tryCatch({
@@ -41,23 +56,10 @@ multiOmics <- function(gene, png_path) {
             axis.title.x = element_text(size = 20),
             axis.title.y = element_text(size = 20))
 
-    # IGV coverage plot showing the peaks at the regulatory region of indicated gene
-    # third plot to show when search for specific gene
-    DefaultAssay(fetal_heart) <-'ATAC'
-    frags <- Fragments(fetal_heart[['ATAC']])
-    Fragments(fetal_heart[['ATAC']]) <- NULL
-    newpath1 <- "3655/atac_fragments.tsv.gz"
-    newpath2 <- "3675/atac_fragments.tsv.gz"
-    newpath3 <- "7668/atac_fragments.tsv.gz"
-    newpath4 <- "3688/atac_fragments.tsv.gz"
-    frags[[1]] <- UpdatePath(frags[[1]],new.path = newpath1)
-    frags[[2]] <- UpdatePath(frags[[2]],new.path = newpath2)
-    frags[[3]] <- UpdatePath(frags[[3]],new.path = newpath3)
-    frags[[4]] <- UpdatePath(frags[[4]],new.path = newpath4)
-    Fragments(fetal_heart[['ATAC']]) <- frags
-    DefaultAssay(fetal_heart) <-'peaks'
-    Fragments(fetal_heart[['peaks']]) <- Fragments(fetal_heart[['ATAC']])
-    p5 <- CoveragePlot(fetal_heart, region = gene,features = gene,annotation = TRUE,peaks = FALSE)
+    # IGV coverage plot: use ATAC assay (fragment paths set at load; do not assign
+    # fragments to peaks to avoid "Cells already present in a fragment object").
+    DefaultAssay(fetal_heart) <- 'ATAC'
+    p5 <- CoveragePlot(fetal_heart, region = gene, features = gene, annotation = TRUE, peaks = FALSE)
 
     combined_plot <- p3 + p4 + p5 + plot_layout(ncol=2)
     ggsave(png_path, plot = combined_plot, width = 15, height = 10, device = "png")

@@ -26,25 +26,46 @@ if [ ! -z "$pid" ]; then
     sleep 1
 fi
 
-# Step 3: Start webserver in screen session
-echo "Step 3: Starting webserver in screen session..."
+# Step 3: Build React frontend
+echo "Step 3: Building React frontend..."
+cd "$BASE_DIR/frontend"
+echo "  Running npm install..."
+npm install
+if npm run build; then
+    echo "  ✓ React frontend built (frontend/dist)"
+else
+    echo "  ⚠ React build failed or npm not found; / will 404 until the frontend is built"
+fi
 cd "$BASE_DIR"
-screen -dmS webserver sudo python3 server.py
+
+# Step 4: Start webserver in screen session
+echo "Step 4: Starting webserver in screen session..."
+# Use python3 (no sudo) when already root to avoid sudo TTY issues in screen
+if [ "$(id -u)" = "0" ]; then
+  PY_CMD="python3 server.py"
+else
+  PY_CMD="sudo python3 server.py"
+fi
+screen -L -Logfile /tmp/webserver_screen.log -dmS webserver bash -c "cd '$BASE_DIR' && exec $PY_CMD"
 sleep 2
 
-# Step 4: Verify server is running
+# Step 5: Verify server is running
 echo ""
-echo "Step 4: Verifying server is running..."
+echo "Step 5: Verifying server is running..."
 sleep 1
 
-screen -ls | grep webserver
+if screen -ls | grep -q webserver; then
+  echo "  ✓ Screen session 'webserver' is running"
+else
+  echo "  ✗ Screen session exited. Check: /tmp/webserver_screen.log"
+fi
 
 echo ""
 echo "Checking port 80..."
 if lsof -ti:80 > /dev/null 2>&1; then
     echo "  ✓ Port 80 is active"
 else
-    echo "  ✗ Port 80 is NOT active"
+    echo "  ✗ Port 80 is NOT active. If the server failed to start, check: /tmp/webserver_screen.log"
 fi
 
 echo ""

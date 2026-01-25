@@ -34,14 +34,26 @@ if (IS_SERVER):
 
 USE_BUILT = False
 
+# React frontend build (Vite). Server serves from here for /, /index.html, /assets/*, and SPA fallback.
+FRONTEND_DIST = "frontend/dist"
+
+# Legacy assets (css, js, imgs) only needed for /html/*. Omit when dirs missing; React is primary.
 registered = []
-
-csses = os.listdir('./css')
-jses = os.listdir('./js')
-if USE_BUILT:
-    jses = os.listdir('./js-build')
-imgs = os.listdir('./imgs')
-
+if os.path.isdir('./css'):
+    for f in os.listdir('./css'):
+        if f.endswith('.css'):
+            registered.append(f'/css/{f}')
+_js_dir = './js-build' if USE_BUILT else './js'
+if os.path.isdir(_js_dir):
+    for f in os.listdir(_js_dir):
+        if f.endswith('.js'):
+            registered.append(f'/js/{f}')
+if os.path.isdir('./imgs'):
+    for f in os.listdir('./imgs'):
+        if 'no_embed' in f.lower():
+            continue
+        if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
+            registered.append(f'/imgs/{f}')
 
 cached_files = {}
 
@@ -59,32 +71,12 @@ def access_file(path: str, bin: bool):
         return data
     return data.decode('utf-8')
 
-for css in csses:
-    if (not css.endswith('.css')):
-        continue
-    registered.append(f'/css/{css}')
-
-for js in jses:
-    if (not js.endswith('.js')):
-        continue
-    registered.append(f'/js/{js}')
-
-for img in imgs:
-    tmp = img.lower()
-    if ('no_embed' in tmp):
-        continue
-    if (not tmp.endswith('.png') and not tmp.endswith('.jpg') and not tmp.endswith('.jpeg')  and not tmp.endswith('.gif')):
-        continue
-    registered.append(f'/imgs/{img}')
-
-
 class Request(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
-        path = self.path
-        if (path == '/'):
-            path = '/html/home.html'
-        if (path == '/index.html'):
-            path = '/html/home.html'
+        path = self.path.split('?')[0]
+        # React SPA: / and /index.html
+        if path == '/' or path == '/index.html':
+            return self.serve_react_index()
         if (path.startswith('/html/')):
             return self.process_html(path)
         if (path.startswith('/imgs/')):
@@ -99,7 +91,11 @@ class Request(BaseHTTPRequestHandler):
             return self.process_robots_txt()
         if (path == '/sitemap.xml'):
             return self.process_sitemap_xml()
-        return self.process_404(self)
+        # React static: /assets/*, /vite.svg, /favicon.ico, /heart_logo_1.png
+        if path.startswith('/assets/') or path in ('/vite.svg', '/favicon.ico', '/heart_logo_1.png'):
+            return self.serve_react_static(path)
+        # SPA fallback for client-side routes: /chat, /spatial, /multiomics, /scrna, etc.
+        return self.serve_react_index()
 
     def do_POST(self) -> None:
         path = self.path
@@ -223,6 +219,8 @@ class Request(BaseHTTPRequestHandler):
             
     
     def process_img(self, path: str) -> None:
+        if not os.path.isdir('./imgs'):
+            return self.process_404()
         path = path[6:]
         assert('..' not in path)
         assert('no_embed' in path)
@@ -261,6 +259,8 @@ class Request(BaseHTTPRequestHandler):
         return
     
     def process_html(self, path: str) -> None:
+        if not os.path.isdir('./html'):
+            return self.process_404()
         if (path.find('..') >= 0):
             return self.process_404(attack=True)
         # print(path)
@@ -333,6 +333,57 @@ class Request(BaseHTTPRequestHandler):
         return
     
     
+    def serve_react_index(self) -> None:
+        """Serve the React SPA index.html. Fall back to /html/home.html if the build is missing."""
+        idx = os.path.join(FRONTEND_DIST, "index.html")
+        if os.path.isfile(idx):
+            with open(idx, "rb") as f:
+                data = f.read()
+            self.send_response(200)
+            self.send_header("Connection", "keep-alive")
+            self.send_header("Content-Type", "text/html")
+            self.send_header("Content-Length", len(data))
+            if BROWSER_CACHE:
+                self.send_header("Cache-Control", "no-cache")
+            self.end_headers()
+            self.wfile.write(data)
+            self.wfile.flush()
+        else:
+            return self.process_404()
+
+    def serve_react_static(self, path: str) -> None:
+        """Serve a static file from frontend/dist. 404 if not found."""
+        rel = path.lstrip("/")
+        if ".." in rel or rel == "":
+            return self.process_404()
+        fp = os.path.join(FRONTEND_DIST, rel)
+        if not os.path.isfile(fp):
+            return self.process_404()
+        ext = os.path.splitext(fp)[1].lower()
+        ct = {
+            ".js": "application/javascript",
+            ".css": "text/css",
+            ".png": "image/png",
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".gif": "image/gif",
+            ".svg": "image/svg+xml",
+            ".ico": "image/x-icon",
+            ".woff": "font/woff",
+            ".woff2": "font/woff2",
+        }.get(ext, "application/octet-stream")
+        with open(fp, "rb") as f:
+            data = f.read()
+        self.send_response(200)
+        self.send_header("Connection", "keep-alive")
+        self.send_header("Content-Type", ct)
+        self.send_header("Content-Length", len(data))
+        if BROWSER_CACHE:
+            self.send_header("Cache-Control", "max-age=300")
+        self.end_headers()
+        self.wfile.write(data)
+        self.wfile.flush()
+
     def process_404(self, attack=False) -> None:
         self.send_response(404)
         self.send_header('Connection', 'keep-alive')

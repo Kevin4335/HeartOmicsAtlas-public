@@ -1,6 +1,6 @@
 import { createTheme } from "@mui/material/styles";
 
-export function createAppTheme(mode: "light" | "dark") {
+export function createAppTheme(_mode: "light" | "dark") {
   // We ignore dark mode for now because your palette is explicitly light.
   // If you later want real dark mode, we define a second palette.
   // Right now consistency > pretending dark mode exists.

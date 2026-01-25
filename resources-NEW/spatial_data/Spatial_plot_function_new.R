@@ -16,6 +16,14 @@ fetal_heart <- RenameIdents(fetal_heart, 'EC' = 'Endothelial','FB' = 'Fibroblast
 fetal_heart$celltype <- Idents(fetal_heart)
 levels(fetal_heart) <- c("ACM","Endothelial","Fibroblast","Macrophages","Neuronal",'RBC',"SAN","SMC")
 
+# Update Seurat object - required for SpatialFeaturePlot to align with tissue_hires_image.png
+tryCatch({
+  fetal_heart <- UpdateSeuratObject(fetal_heart)
+  cat("Seurat object updated successfully\n")
+}, error = function(e) {
+  cat("Warning: UpdateSeuratObject failed:", conditionMessage(e), "\n")
+})
+
 # Function to generate plots for a given gene and save to PNG
 # Spatial plot showing the expression of indicated gene - first plot when search for specific gene
 # UMAP plot showing the expression of indicated gene - second plot when search for specific gene

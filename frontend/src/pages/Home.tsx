@@ -6,11 +6,13 @@ import {
   Card,
   CardContent,
   Chip,
+  InputAdornment,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
+import heartLogo from "../assets/heart_logo_1.png";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -92,6 +94,18 @@ export default function Home() {
               onChange={(e) => setChatInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") goChat(chatInput);
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Box
+                      component="img"
+                      src={heartLogo}
+                      alt=""
+                      sx={{ width: 28, height: 28, display: "block" }}
+                    />
+                  </InputAdornment>
+                ),
               }}
             />
             <Button

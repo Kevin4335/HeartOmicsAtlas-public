@@ -146,30 +146,6 @@ export default function GeneImagePage({
             >
               {({ resetTransform, zoomIn, zoomOut }) => (
                 <>
-                  {/* Zoom controls */}
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: 8,
-                      right: 8,
-                      zIndex: 3,
-                      display: "flex",
-                      gap: 0.5,
-                      backgroundColor: "rgba(255,255,255,0.9)",
-                      border: "1px solid rgba(0,0,0,0.15)",
-                    }}
-                  >
-                    <Button size="small" onClick={zoomOut} sx={{ borderRadius: 0 }}>
-                      -
-                    </Button>
-                    <Button size="small" onClick={zoomIn} sx={{ borderRadius: 0 }}>
-                      +
-                    </Button>
-                    <Button size="small" onClick={resetTransform} sx={{ borderRadius: 0 }}>
-                      Reset
-                    </Button>
-                  </Box>
-
                   <TransformComponent
                     wrapperStyle={{ width: "100%", height: "100%" }}
                     contentStyle={{ width: "100%", height: "100%" }}
@@ -197,6 +173,46 @@ export default function GeneImagePage({
                       }}
                     />
                   </TransformComponent>
+
+                  {/* Zoom controls: rendered after TransformComponent so they sit on top and receive clicks */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      zIndex: 10,
+                      display: "flex",
+                      gap: 0.5,
+                      backgroundColor: "rgba(255,255,255,0.9)",
+                      border: "1px solid rgba(0,0,0,0.15)",
+                      pointerEvents: "auto",
+                    }}
+                  >
+                    <Button
+                      type="button"
+                      size="small"
+                      onClick={() => zoomOut()}
+                      sx={{ borderRadius: 0, minWidth: 36 }}
+                    >
+                      -
+                    </Button>
+                    <Button
+                      type="button"
+                      size="small"
+                      onClick={() => zoomIn()}
+                      sx={{ borderRadius: 0, minWidth: 36 }}
+                    >
+                      +
+                    </Button>
+                    <Button
+                      type="button"
+                      size="small"
+                      onClick={() => resetTransform()}
+                      sx={{ borderRadius: 0 }}
+                    >
+                      Reset
+                    </Button>
+                  </Box>
                 </>
               )}
             </TransformWrapper>
