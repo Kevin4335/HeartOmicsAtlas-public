@@ -8,28 +8,48 @@ library(RColorBrewer)
 library(httpuv)
 library(jsonlite)
 
+#### example genes to list in the search panel
+#### SHOX2, NPPA, MYL7, STMN2
+
 # load the data
 Combine <- readRDS("ACM_VCM_SAN_annotated.rds")
-
-levels(Combine) <- c("ACM","Endothelial","Epicardial","Epithelial","FB_1","FB_2",
+Combine <- RenameIdents(Combine, 'FB_1' = 'Fibroblast_1','FB_2' = 'Fibroblast_2')
+Combine$celltype <- Idents(Combine)
+levels(Combine) <- c("ACM","Endothelial","Epicardial","Epithelial","Fibroblast_1","Fibroblast_2",
                      "Neuronal","Neural_Crest","Proliferating","SAN","VCM")
 
 # Plot generator for ACM_VCM_SAN data
+# Violin plot - first plot when search for specific gene
+# UMAP - second plot when search for specific gene
+# Dotplot - third plot when search for specific gene
 acmvcmOmics <- function(genes, png_path) {
   tryCatch({
     # Violin plot showing the expression of indicated gene
-    # show after type in the search gene 
-    p4 <- VlnPlot(Combine,features = genes,pt.size = 0) + labs(x = '')
-    
-    # UMAP to demonstrate the expression of selected gene
-    # show after type in the search gene 
-    p3 <- FeaturePlot(Combine,features = genes) + labs(x = 'UMAP_1',y = "UMAP_2")
-    
-    # Dotplot to demonstrate the expression of selected gene
-    # show after type in the search gene 
-    p2 <- DotPlot(Combine,features = genes) + labs(x = 'UMAP_1', y = 'UMAP_2')
+    p4 <- VlnPlot(Combine,features = genes,pt.size = 0) + labs(x = '') +
+      theme(plot.title = element_text(size = 20,hjust = 0.5),
+            legend.text = element_text(size = 16),
+            axis.text.x = element_text(size = 20),
+            axis.text.y = element_text(size = 20),
+            axis.title.x = element_text(size = 20),
+            axis.title.y = element_text(size = 20))
 
-    combined <- p2 + p3 + p4 + plot_layout(ncol = 2)
+    # UMAP to demonstrate the expression of selected gene
+    p3 <- FeaturePlot(Combine,features = genes) +
+      labs(x = 'UMAP_1',y = "UMAP_2") +
+      theme(plot.title = element_text(size = 20,hjust = 0.5),
+            legend.text = element_text(size = 16),
+            axis.text.x = element_text(size = 20),
+            axis.text.y = element_text(size = 20),
+            axis.title.x = element_text(size = 20),
+            axis.title.y = element_text(size = 20))
+
+    # Dotplot to demonstrate the expression of selected gene
+    p2 <- DotPlot(Combine,features = genes) + labs(x = '',y = '')+
+      theme(axis.text.x = element_text(size = 16),
+            axis.text.y = element_text(size = 16)) +
+      RotatedAxis()
+
+    combined <- p4 + p3 + p2 + plot_layout(ncol = 2)
     ggsave(png_path, plot = combined, width = 15, height = 10, device = "png")
     cat("Saved image to", png_path, "\n")
   }, error = function(e) {
@@ -108,7 +128,6 @@ app <- list(
 server <- startServer("0.0.0.0", 9027, app)
 cat("ACM_VCM_SAN Omics server started at http://localhost:9027\n")
 
-# Keep it running
 while (TRUE) {
   service()
   Sys.sleep(0.001)

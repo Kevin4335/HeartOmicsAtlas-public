@@ -8,28 +8,48 @@ library(RColorBrewer)
 library(httpuv)
 library(jsonlite)
 
+#### example genes to list in the search panel
+#### SHOX2, NPPA, MYL7, CDH5
+
 # load the data
 heart <- readRDS("mini_heart_annotated.rds")
-
-levels(heart) <- c("ACM","Endothelial","Epicardial","Epithelial","FB",
+heart <- RenameIdents(heart, 'FB' = 'Fibroblast')
+heart$celltype <- Idents(heart)
+levels(heart) <- c("ACM","Endothelial","Epicardial","Epithelial","Fibroblast",
                    "Neuronal","Proliferating","SAN","VCM")
 
 # Plot generator for Mini-heart data
+# Violin plot - first plot when search for specific gene
+# UMAP - second plot when search for specific gene
+# Dotplot - third plot when search for specific gene
 miniHeartOmics <- function(genes, png_path) {
   tryCatch({
     # Violin plot showing the expression of indicated gene
-    # show after type in the search gene 
-    p4 <- VlnPlot(heart,features = genes,pt.size = 0) + labs(x = '')
-    
-    # UMAP to demonstrate the expression of selected gene
-    # show after type in the search gene 
-    p3 <- FeaturePlot(heart,features = genes) + labs(x = 'UMAP_1',y = "UMAP_2")
-    
-    # Dotplot to demonstrate the expression of selected gene
-    # show after type in the search gene 
-    p2 <- DotPlot(heart,features = genes) + labs(x = 'UMAP_1', y = 'UMAP_2')
+    p4 <- VlnPlot(heart,features = genes,pt.size = 0) + labs(x = '') +
+      theme(plot.title = element_text(size = 20,hjust = 0.5),
+            legend.text = element_text(size = 16),
+            axis.text.x = element_text(size = 20),
+            axis.text.y = element_text(size = 20),
+            axis.title.x = element_text(size = 20),
+            axis.title.y = element_text(size = 20))
 
-    combined <- p2 + p3 + p4 + plot_layout(ncol = 2)
+    # UMAP to demonstrate the expression of selected gene
+    p3 <- FeaturePlot(heart,features = genes) +
+      labs(x = 'UMAP_1',y = "UMAP_2") +
+      theme(plot.title = element_text(size = 20,hjust = 0.5),
+            legend.text = element_text(size = 16),
+            axis.text.x = element_text(size = 20),
+            axis.text.y = element_text(size = 20),
+            axis.title.x = element_text(size = 20),
+            axis.title.y = element_text(size = 20))
+
+    # Dotplot to demonstrate the expression of selected gene
+    p2 <- DotPlot(heart,features = genes) + labs(x = '',y = '')+
+      theme(axis.text.x = element_text(size = 16),
+            axis.text.y = element_text(size = 16)) +
+      RotatedAxis()
+
+    combined <- p4 + p3 + p2 + plot_layout(ncol = 2)
     ggsave(png_path, plot = combined, width = 15, height = 10, device = "png")
     cat("Saved image to", png_path, "\n")
   }, error = function(e) {
@@ -108,7 +128,6 @@ app <- list(
 server <- startServer("0.0.0.0", 9029, app)
 cat("Mini-heart Omics server started at http://localhost:9029\n")
 
-# Keep it running
 while (TRUE) {
   service()
   Sys.sleep(0.001)

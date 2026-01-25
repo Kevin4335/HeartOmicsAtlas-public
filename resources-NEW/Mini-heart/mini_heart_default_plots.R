@@ -11,17 +11,28 @@ library(RColorBrewer)
 
 # load the data
 heart <- readRDS("mini_heart_annotated.rds")
-
-levels(heart) <- c("ACM","Endothelial","Epicardial","Epithelial","FB",
+heart <- RenameIdents(heart, 'FB' = 'Fibroblast')
+heart$celltype <- Idents(heart)
+levels(heart) <- c("ACM","Endothelial","Epicardial","Epithelial","Fibroblast",
                    "Neuronal","Proliferating","SAN","VCM")
 
 # UMAP demonstrate different cell populations based on RNA expression
-# show in the default page
-p1 <- UMAPPlot(heart,label=TRUE,label.size =5,repel = TRUE) + labs(x = 'UMAP_1', y = 'UMAP_2')
+# first plot to demonstrate in default page
+p1 <- UMAPPlot(heart,label=TRUE,label.size =6,repel = TRUE) + labs(x = 'UMAP_1',y = 'UMAP_2') +
+  guides(color = guide_legend(override.aes = list(size = 4))) +
+  theme(legend.text = element_text(size = 20),
+        axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 20),
+        axis.title.x = element_text(size = 20),
+        axis.title.y = element_text(size = 20))
 
 # dotplot demonstrate the marker expression of each cell population
-# show in the default page
-p2 <- DotPlot(heart,features = c("NPPA","CDH5","WT1","EPCAM","DCN","STMN2","TOP2A","SHOX2","HEY2")) + RotatedAxis() + labs(x = '',y = '')
+# second plot to demonstrate in default page
+p2 <- DotPlot(heart,features = c("NPPA","CDH5","WT1","EPCAM","DCN","STMN2","TOP2A","SHOX2","HEY2")) +
+  labs(x='',y='') +
+  theme(axis.text.x = element_text(size = 16),
+        axis.text.y = element_text(size = 16)) +
+  RotatedAxis()
 
 # Combine plots: side by side
 combined <- p1 + p2
