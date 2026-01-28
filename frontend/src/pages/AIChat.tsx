@@ -8,6 +8,7 @@ import {
   CardContent,
   Container,
   IconButton,
+  LinearProgress,
   List,
   ListItem,
   Modal,
@@ -153,7 +154,6 @@ export default function AIChat() {
     setError("");
 
     const userMsg: DisplayMessage = { type: "user", content: trimmed };
-    const loadingMsg: DisplayMessage = { type: "text", content: "Loading..." };
 
     // Build openai history
     const openaiHistory: HistoryItem[] = [
@@ -161,8 +161,8 @@ export default function AIChat() {
       { role: "user", content: trimmed },
     ];
 
-    // Optimistically show user + loading
-    const nextDisplay = [...messages, userMsg, loadingMsg];
+    // Optimistically show the user message; render a progress bar while waiting.
+    const nextDisplay: DisplayMessage[] = [...messages, userMsg];
     setMessages(nextDisplay);
     localStorage.setItem(LS_OPENAI, JSON.stringify(openaiHistory));
     localStorage.setItem(LS_DISPLAY, JSON.stringify(nextDisplay));
@@ -266,6 +266,16 @@ export default function AIChat() {
             flexDirection: "column",
           }}
         >
+          {waiting ? (
+            <LinearProgress
+              color="primary"
+              sx={{
+                height: 4,
+                "& .MuiLinearProgress-bar": { backgroundColor: "#8B0000" },
+              }}
+            />
+          ) : null}
+
           {/* Scrollable messages */}
           <Box
             ref={scrollRef}

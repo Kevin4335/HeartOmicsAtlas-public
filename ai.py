@@ -15,6 +15,7 @@ import anthropic
 import traceback
 import secrets
 import openai
+import requests
 from config import API_KEY
 from config import CHAT_KEY
 __all__ = ['process_ai_chat']
@@ -250,70 +251,151 @@ def get_gpt_resp(history: list) -> Tuple[bool, str, str]:
 
 def glkb_chat(question: str) -> Tuple[bool, str]:
     """
-    Calls GLKB LLM agent via SSE endpoint and returns (success, final_answer_or_error).
-    No chat history is used (messages = []).
+    Safe-ish GLKB SSE caller.
+    - No history (messages = [])
+    - Handles SSE chunking
+    - Adds basic retries + backoff
+    - Adds caps to avoid runaway memory
+    - Better error messages (HTTP body snippet, content-type, etc.)
     """
     URL = "https://glkb.dcmb.med.umich.edu/api/frontend/llm_agent"
     PREFIX = "[AGENT OUTPUT] FinalAnswerAgent | Output:"
 
-    try:
-        payload = {"question": question, "messages": []}
+    # Safety knobs
+    CONNECT_TIMEOUT_S = 10
+    READ_TIMEOUT_S = 180
+    MAX_ATTEMPTS = 3
+    BACKOFF_S = 1.5
 
-        # stream=True is required because response is text/event-stream (SSE)
-        with requests.post(URL, json=payload, stream=True, timeout=(10, 180)) as r:
-            r.raise_for_status()
+    # Prevent runaway memory if server goes wild
+    MAX_CHUNKS = 200
+    MAX_TOTAL_CHARS = 200_000  # 200k chars
 
-            # Collect all FinalAnswerAgent output chunks (handles both single-shot and chunked servers)
-            chunks: List[str] = []
+    payload = {"question": question, "messages": []}
 
-            for raw_line in r.iter_lines(decode_unicode=True):
-                if not raw_line:
-                    continue
+    last_err = None
 
-                line = raw_line.strip()
-                if not line.startswith("data:"):
-                    continue
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            with requests.Session() as session:
+                with session.post(
+                    URL,
+                    json=payload,
+                    stream=True,
+                    timeout=(CONNECT_TIMEOUT_S, READ_TIMEOUT_S),
+                    headers={
+                        # Not strictly required, but makes intent explicit
+                        "Accept": "text/event-stream",
+                        "Content-Type": "application/json",
+                        "User-Agent": "glkb-python-client/1.0",
+                    },
+                ) as r:
+                    # If non-200, capture a short body snippet for debugging
+                    if r.status_code < 200 or r.status_code >= 300:
+                        body_snip = ""
+                        try:
+                            body_snip = (r.text or "")[:800]
+                        except Exception:
+                            body_snip = "<unable to read body>"
+                        ct = r.headers.get("content-type", "")
+                        return (
+                            False,
+                            f"HTTP {r.status_code}. Content-Type: {ct}. Body (first 800 chars): {body_snip}",
+                        )
 
-                data_str = line[len("data:"):].strip()
-                if not data_str or data_str == "[DONE]":
-                    continue
+                    ct = (r.headers.get("content-type") or "").lower()
+                    if "text/event-stream" not in ct:
+                        body_snip = ""
+                        try:
+                            body_snip = (r.text or "")[:800]
+                        except Exception:
+                            body_snip = "<unable to read body>"
+                        return (
+                            False,
+                            f"Expected SSE (text/event-stream) but got Content-Type: {ct}. Body (first 800 chars): {body_snip}",
+                        )
 
-                try:
-                    obj = json.loads(data_str)
-                except json.JSONDecodeError:
-                    continue
+                    chunks: List[str] = []
+                    total_chars = 0
 
-                content = obj.get("content")
-                if not isinstance(content, str) or not content:
-                    continue
+                    for raw_line in r.iter_lines(decode_unicode=True):
+                        if raw_line is None:
+                            continue
 
-                idx = content.find(PREFIX)
-                if idx == -1:
-                    continue
+                        line = raw_line.strip()
+                        if not line:
+                            continue
+                        if not line.startswith("data:"):
+                            continue
 
-                # Keep only the actual answer text after the prefix
-                answer_piece = content[idx + len(PREFIX):].lstrip()
-                if answer_piece:
-                    chunks.append(answer_piece)
+                        data_str = line[len("data:"):].strip()
+                        if not data_str:
+                            continue
+                        if data_str == "[DONE]":
+                            break
 
-            if not chunks:
-                # Helpful debugging: show status + content-type to confirm SSE is working
-                ct = r.headers.get("content-type", "")
-                return (False, f"No FinalAnswerAgent output found. HTTP {r.status_code}. Content-Type: {ct}")
+                        # Parse JSON payload
+                        try:
+                            obj = json.loads(data_str)
+                        except json.JSONDecodeError:
+                            # Some servers occasionally emit non-JSON keepalives
+                            continue
 
-            # Join chunks without losing formatting
-            result = "\n".join(chunks).strip()
-            return (True, result)
+                        content = obj.get("content")
+                        if not isinstance(content, str) or not content:
+                            continue
 
-    except requests.exceptions.Timeout:
-        return (False, "Timed out connecting to or reading from GLKB endpoint.")
-    except requests.exceptions.RequestException as e:
-        return (False, f"HTTP/network error: {e}")
-    except Exception:
-        return (False, traceback.format_exc())
+                        idx = content.find(PREFIX)
+                        if idx == -1:
+                            continue
 
+                        piece = content[idx + len(PREFIX):].lstrip()
+                        if not piece:
+                            continue
 
+                        # Safety caps
+                        if len(chunks) >= MAX_CHUNKS:
+                            break
+                        if total_chars + len(piece) > MAX_TOTAL_CHARS:
+                            remaining = MAX_TOTAL_CHARS - total_chars
+                            if remaining > 0:
+                                chunks.append(piece[:remaining])
+                                total_chars += remaining
+                            break
 
+                        chunks.append(piece)
+                        total_chars += len(piece)
+
+                    if not chunks:
+                        # Not necessarily "error" server-side, but you got no final output.
+                        # Give a useful hint.
+                        return (
+                            False,
+                            "No FinalAnswerAgent output found in SSE stream. "
+                            "The agent may have failed, returned only traces, or the prefix format changed.",
+                        )
+
+                    result = "\n".join(chunks).strip()
+                    return True, result
+
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+            last_err = f"{type(e).__name__}: {e}"
+            if attempt < MAX_ATTEMPTS:
+                time.sleep(BACKOFF_S * attempt)
+                continue
+            return False, f"Network/timeout after {MAX_ATTEMPTS} attempts: {last_err}"
+
+        except requests.exceptions.RequestException as e:
+            # Non-timeout requests errors
+            last_err = f"{type(e).__name__}: {e}"
+            return False, f"HTTP/network error: {last_err}"
+
+        except Exception:
+            last_err = traceback.format_exc()
+            return False, last_err
+
+    # Should never hit
+    return False, last_err or "Unknown error"
 
 def generate_messgae(resp: str) -> str:
     messages = []
