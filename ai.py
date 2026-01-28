@@ -248,20 +248,71 @@ def get_gpt_resp(history: list) -> Tuple[bool, str, str]:
     return (False, 'GPT returns illegal format after max retries. Please copy your input, refresh the page and try again.', '')
 
 
-def glkb_chat(question: str) -> tuple[bool, str]:
+def glkb_chat(question: str) -> Tuple[bool, str]:
+    """
+    Calls GLKB LLM agent via SSE endpoint and returns (success, final_answer_or_error).
+    No chat history is used (messages = []).
+    """
+    URL = "https://glkb.dcmb.med.umich.edu/api/frontend/llm_agent"
+    PREFIX = "[AGENT OUTPUT] FinalAnswerAgent | Output:"
+
     try:
-        client = openai.OpenAI(base_url='http://104.187.142.167:40682/v1', api_key=CHAT_KEY)
-        response = client.chat.completions.create(
-            model='my-model',
-            messages=[
-                {'role': 'user', 'content': question}
-            ]
-        )
-        result = response.choices[0].message.content
-        return (True, result)
-    except:
-        err_msg = traceback.format_exc()
-        return (False, err_msg)
+        payload = {"question": question, "messages": []}
+
+        # stream=True is required because response is text/event-stream (SSE)
+        with requests.post(URL, json=payload, stream=True, timeout=(10, 180)) as r:
+            r.raise_for_status()
+
+            # Collect all FinalAnswerAgent output chunks (handles both single-shot and chunked servers)
+            chunks: List[str] = []
+
+            for raw_line in r.iter_lines(decode_unicode=True):
+                if not raw_line:
+                    continue
+
+                line = raw_line.strip()
+                if not line.startswith("data:"):
+                    continue
+
+                data_str = line[len("data:"):].strip()
+                if not data_str or data_str == "[DONE]":
+                    continue
+
+                try:
+                    obj = json.loads(data_str)
+                except json.JSONDecodeError:
+                    continue
+
+                content = obj.get("content")
+                if not isinstance(content, str) or not content:
+                    continue
+
+                idx = content.find(PREFIX)
+                if idx == -1:
+                    continue
+
+                # Keep only the actual answer text after the prefix
+                answer_piece = content[idx + len(PREFIX):].lstrip()
+                if answer_piece:
+                    chunks.append(answer_piece)
+
+            if not chunks:
+                # Helpful debugging: show status + content-type to confirm SSE is working
+                ct = r.headers.get("content-type", "")
+                return (False, f"No FinalAnswerAgent output found. HTTP {r.status_code}. Content-Type: {ct}")
+
+            # Join chunks without losing formatting
+            result = "\n".join(chunks).strip()
+            return (True, result)
+
+    except requests.exceptions.Timeout:
+        return (False, "Timed out connecting to or reading from GLKB endpoint.")
+    except requests.exceptions.RequestException as e:
+        return (False, f"HTTP/network error: {e}")
+    except Exception:
+        return (False, traceback.format_exc())
+
+
 
 
 def generate_messgae(resp: str) -> str:
