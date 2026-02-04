@@ -10,19 +10,19 @@ export function createAppTheme(_mode: "light" | "dark") {
       mode: "light",
 
       primary: {
-        main: "#8B0000",
-        dark: "#a52a2a",
+        main: "#C30F1A",
+        dark: "#9a0c15",
         contrastText: "#ffffff",
       },
 
       background: {
-        default: "#f8f9fa",
-        paper: "#f8f9fa", 
+        default: "#ffffff",
+        paper: "#ffffff", 
       },
 
       text: {
-        primary: "#263238",
-        secondary: "#495057",
+        primary: "#000000",
+        secondary: "#333333",
       },
     },
 
@@ -53,7 +53,7 @@ export function createAppTheme(_mode: "light" | "dark") {
       MuiCard: {
         styleOverrides: {
           root: {
-            backgroundColor: "#e9ecef",
+            backgroundColor: "#f5f5f5",
             borderRadius: 16,
           },
         },
@@ -62,7 +62,8 @@ export function createAppTheme(_mode: "light" | "dark") {
       MuiAppBar: {
         styleOverrides: {
           root: {
-            backgroundColor: "#8B0000",
+            backgroundColor: "#ffffff",
+            color: "#000000",
           },
         },
       },
