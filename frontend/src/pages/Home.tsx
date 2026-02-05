@@ -5,31 +5,39 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import DoubleArrowIcon from "@mui/icons-material/DoubleArrow";
 import mainBackground from "../assets/main_background.svg";
+import logo from "../assets/heart_logo_1.svg";
+import scrnaseq from "../assets/scrnaseq.png";
+import spatialtrans from "../assets/spatialtrans.png";
+import multiomics from "../assets/multiomics.png";
+import consultai from "../assets/consultai.png";
+import comparemodalities from "../assets/comparemodalities.png";
+import selectagene from "../assets/selectagene.png";
 
-// Placeholder for the 3 feature items - replace with actual images later
+//  3 feature items 
 const featureItems = [
-  { image: "/placeholder1.png", text: "Spatial Transcriptomics" },
-  { image: "/placeholder2.png", text: "Single-cell RNA Sequencing" },
-  { image: "/placeholder3.png", text: "Multi-omics Integration" },
+  { image: scrnaseq, text: "scRNA-seq" },
+  { image: spatialtrans, text: "Spatial Transcriptomics" },
+  { image: multiomics, text: "Multiomics" },
 ];
 
 // Placeholder for the 3 "How Researchers Use" cards
 const researcherSteps = [
   {
-    image: "/step1.png",
-    title: "Explore Data",
-    subtitle: "Browse spatial and single-cell datasets",
+    image: selectagene,
+    title: "Search a gene",
+    subtitle: "View expression across cell types and space",
   },
   {
-    image: "/step2.png",
-    title: "Analyze Genes",
-    subtitle: "Visualize gene expression patterns",
+    image: comparemodalities,
+    title: "Compare modalities",
+    subtitle: "View expression across scRNA, spatial, and multiomics",
   },
   {
-    image: "/step3.png",
-    title: "Get Insights",
-    subtitle: "AI-powered analysis and interpretation",
+    image: consultai,
+    title: "Ask questions with AI",
+    subtitle: "Interpret data patterns, support hypothesis generation",
   },
 ];
 
@@ -51,76 +59,101 @@ export default function Home() {
       >
         {/* Content container with margins */}
         <Box sx={{ px: "6.7%" }}>
-          {/* Content limited to 66% of the work area, left aligned */}
-          <Box sx={{ width: "66%", maxWidth: "66%" }}>
-            <Typography
-              variant="h3"
-              sx={{
-                fontWeight: 800,
-                color: "#000000",
-                mb: 2,
-                fontSize: { xs: "2rem", md: "2.5rem", lg: "3rem" },
-              }}
-            >
-              Welcome to HeartOmicsAtlas
-            </Typography>
-
-            <Typography
-              variant="body1"
-              sx={{
-                color: "#000000",
-                lineHeight: 1.8,
-                mb: 4,
-                fontSize: { xs: "0.95rem", md: "1.05rem" },
-              }}
-            >
-              HeartOmicsAtlas is an AI-powered, user-friendly, open-access platform for analyzing
-              spatial and single-nucleus (sn-)multiomics data. It features spatial transcriptomics
-              and sn-multiomics datasets from fetal heart samples, as well as scRNA-seq data split
-              into three subchannels.
-            </Typography>
-
-            {/* Two side-by-side buttons */}
-            <Stack direction="row" spacing={2}>
-              <Button
-                variant="contained"
+          {/* Flex row */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 4,
+            }}
+          >
+            {/* LEFT SIDE — text */}
+            <Box sx={{ width: { xs: "100%", md: "60%" } }}>
+              <Typography
+                variant="h3"
                 sx={{
-                  borderRadius: "6px",
-                  px: 4,
-                  py: 1.5,
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  textTransform: "none",
-                  minWidth: 180,
-                }}
-                onClick={() => navigate("/chat")}
-              >
-                Chat with AI
-              </Button>
-              <Button
-                variant="outlined"
-                sx={{
-                  borderRadius: "6px",
-                  px: 4,
-                  py: 1.5,
-                  fontSize: "1rem",
-                  fontWeight: 600,
-                  textTransform: "none",
-                  minWidth: 180,
-                  borderColor: "#000000",
+                  fontWeight: 800,
                   color: "#000000",
-                  "&:hover": {
-                    borderColor: "#000000",
-                    backgroundColor: "rgba(0, 0, 0, 0.04)",
-                  },
+                  mb: 2,
+                  fontSize: { xs: "2rem", md: "2.5rem", lg: "3rem" },
                 }}
-                onClick={() => navigate("/st")}
               >
-                Explore Data
-              </Button>
-            </Stack>
+                Welcome to HeartOmicsAtlas
+              </Typography>
+
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "#000000",
+                  lineHeight: 1.8,
+                  mb: 4,
+                  fontSize: { xs: "0.95rem", md: "1.05rem" },
+                }}
+              >
+                HeartOmicsAtlas is an AI-powered, user-friendly, 
+                open-access platform for analyzing spatial and single-nucleus 
+                (sn-)multiomics data. It features spatial transcriptomics 
+                and sn-multiomics datasets from fetal heart samples, as well 
+                as scRNA-seq data split into three subchannels.
+              </Typography>
+
+              <Stack direction="row" spacing={2}>
+                <Button
+                  variant="contained"
+                  sx={{
+                    borderRadius: "6px",
+                    px: 4,
+                    py: 1.5,
+                    fontSize: "1rem",
+                    fontWeight: 600,
+                    textTransform: "none",
+                    minWidth: 180,
+                  }}
+                  onClick={() => navigate("/chat")}
+                >
+                  Chat with AI
+                </Button>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    borderRadius: "6px",
+                    px: 4,
+                    py: 1.5,
+                    fontSize: "1rem",
+                    fontWeight: 600,
+                    textTransform: "none",
+                    minWidth: 180,
+                    borderColor: "#000000",
+                    color: "#000000",
+                    "&:hover": {
+                      borderColor: "#000000",
+                      backgroundColor: "rgba(0, 0, 0, 0.04)",
+                    },
+                  }}
+                  onClick={() => navigate("/st")}
+                >
+                  Explore Data
+                </Button>
+              </Stack>
+            </Box>
+
+            {/* RIGHT SIDE — BIG LOGO */}
+            <Box
+              component="img"
+              src={logo}
+              alt="HeartOmicsAtlas Logo"
+              sx={{
+                width: { xs: 0, lg: 204},
+                height: "auto",
+                objectFit: "contain",
+                marginRight: '10vw',
+                display: { xs: "none", md: "block" }, // hide on mobile
+              }}
+            />
           </Box>
         </Box>
+
       </Box>
 
       {/* Second Section - What does HeartOmicsAtlas Include? */}
@@ -154,7 +187,7 @@ export default function Home() {
             direction="row"
             justifyContent="center"
             alignItems="center"
-            spacing={6}
+            spacing={28}
           >
             {featureItems.map((item, index) => (
               <Stack
@@ -165,27 +198,16 @@ export default function Home() {
               >
                 {/* Placeholder image box - replace with actual images */}
                 <Box
+                  component="img"
+                  src={item.image}
+                  alt={item.text}
                   sx={{
-                    width: 48,
-                    height: 48,
-                    backgroundColor: "#e0e0e0",
+                    width: 64,
+                    height: 64,
                     borderRadius: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    objectFit: "contain",
                   }}
-                >
-                  {/* Placeholder icon */}
-                  <Box
-                    component="span"
-                    sx={{
-                      fontSize: 24,
-                      color: "#666",
-                    }}
-                  >
-                    {index + 1}
-                  </Box>
-                </Box>
+                />
                 <Typography
                   sx={{
                     color: "#000000",
@@ -219,28 +241,29 @@ export default function Home() {
           <Box component="span" sx={{ color: "#000000" }}>Atlas.</Box>
         </Typography>
 
-        {/* Cards with arrows - spans full working area width */}
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          sx={{ width: "100%", marginBottom: '5vw'}}
+        {/* Cards with arrows - 5 flex items: card, arrow, card, arrow, card */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            width: "100%",
+            marginBottom: "5vw",
+          }}
         >
           {researcherSteps.map((step, index) => (
             <Box 
               key={index} 
               sx={{ 
-                display: "flex", 
-                alignItems: "center",
-                flex: 1,
+                display: "contents", // Allows children to participate directly in parent flex
               }}
             >
-              {/* Card with overlapping red circle */}
+              {/* Card with overlapping red circle - flex: 3 (larger portion) */}
               <Box
                 sx={{
                   position: "relative",
                   pt: 3, // Space for the overlapping circle
-                  flex: 1,
+                  flex: 3, // Each card takes 3 parts
                 }}
               >
                 {/* Red numbered circle - positioned to overlap top of card */}
@@ -270,38 +293,33 @@ export default function Home() {
                   </Typography>
                 </Box>
 
-                {/* Card */}
+                {/* Card - slightly taller than wide */}
                 <Box
                   sx={{
-                    minHeight: 340,
+                    aspectRatio: "1 / 1.1",
                     backgroundColor: "#FAF8FD",
                     borderRadius: "16px",
                     boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
-                    p: 3,
-                    pt: 5, // Extra top padding for circle overlap area
+                    px: 2,
+                    py: 1.5,
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  {/* Placeholder image */}
+                  {/* Image - larger, takes more of the card area */}
                   <Box
+                    component="img"
+                    src={step.image}
+                    alt={step.title}
                     sx={{
-                      width: 100,
-                      height: 100,
-                      backgroundColor: "#e8e4ed",
-                      borderRadius: "12px",
-                      mb: 3,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      width: "70%",
+                      height: "auto",
+                      objectFit: "contain",
+                      mb: 2,
                     }}
-                  >
-                    <Typography sx={{ color: "#999", fontSize: 40 }}>
-                      📊
-                    </Typography>
-                  </Box>
+                  />
 
                   {/* Title - similar size to section title */}
                   <Typography
@@ -330,43 +348,29 @@ export default function Home() {
                 </Box>
               </Box>
 
-              {/* Arrow between cards (not after the last card) */}
+              {/* Arrow between cards (not after the last card) - flex: 1 (smaller portion) */}
               {index < researcherSteps.length - 1 && (
                 <Box
                   sx={{
-                    mx: 2,
+                    flex: 1, // Each arrow takes 1 part
                     display: "flex",
                     alignItems: "center",
-                    mt: 3, // Align with card center
-                    flexShrink: 0,
+                    justifyContent: "center",
+                    mt: 3,
                   }}
                 >
-                  {/* Simple arrow using CSS */}
-                  <Box
+                  <DoubleArrowIcon
                     sx={{
-                      width: 40,
-                      height: 2,
-                      backgroundColor: "#C30F1A",
-                      position: "relative",
-                      "&::after": {
-                        content: '""',
-                        position: "absolute",
-                        right: -1,
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        width: 0,
-                        height: 0,
-                        borderTop: "6px solid transparent",
-                        borderBottom: "6px solid transparent",
-                        borderLeft: "10px solid #C30F1A",
-                      },
+                      color: "#FFD280", // Lighter orange-yellow color
+                      fontSize: 80,
+                      transform: "scaleY(2)", // Stretch vertically to make it very tall
                     }}
                   />
                 </Box>
               )}
             </Box>
           ))}
-        </Stack>
+        </Box>
       </Box>
     </Box>
   );

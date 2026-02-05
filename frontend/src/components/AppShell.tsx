@@ -1,7 +1,7 @@
 import type { PropsWithChildren } from "react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 import { useState } from "react";
-import logo from "../assets/heart_logo_1.png";
+import logo from "../assets/heart_logo_1.svg";
 import EmailOutlined from "@mui/icons-material/EmailOutlined";
 import PhoneOutlined from "@mui/icons-material/PhoneOutlined";
 import LocationOnOutlined from "@mui/icons-material/LocationOnOutlined";
@@ -128,8 +128,8 @@ export default function AppShell({ children }: PropsWithChildren) {
                 src={logo}
                 alt="HeartOmicsAtlas logo"
                 sx={{
-                  width: 64,
-                  height: 64,
+                  width: 42,
+                  height: 42,
                   display: "block",
                 }}
               />
