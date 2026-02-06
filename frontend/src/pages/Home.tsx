@@ -19,7 +19,7 @@ import selectagene from "../assets/selectagene.png";
 const featureItems = [
   { image: scrnaseq, text: "scRNA-seq" },
   { image: spatialtrans, text: "Spatial Transcriptomics" },
-  { image: multiomics, text: "Multiomics" },
+  { image: multiomics, text: "scMultiomics" },
 ];
 
 // Placeholder for the 3 "How Researchers Use" cards
@@ -32,7 +32,7 @@ const researcherSteps = [
   {
     image: comparemodalities,
     title: "Compare modalities",
-    subtitle: "View expression across scRNA, spatial, and multiomics",
+    subtitle: "View expression across scRNA, spatial, and scMultiomics",
   },
   {
     image: consultai,
@@ -58,7 +58,7 @@ export default function Home() {
         }}
       >
         {/* Content container with margins */}
-        <Box sx={{ px: "6.7%" }}>
+        <Box sx={{ px: "7.7%" }}>
           {/* Flex row */}
           <Box
             sx={{
@@ -69,17 +69,17 @@ export default function Home() {
             }}
           >
             {/* LEFT SIDE — text */}
-            <Box sx={{ width: { xs: "100%", md: "60%" } }}>
+            <Box sx={{ width: { xs: "100%", md: "75%" } }}>
               <Typography
                 variant="h3"
                 sx={{
-                  fontWeight: 800,
+                  fontWeight: 700,
                   color: "#000000",
                   mb: 2,
-                  fontSize: { xs: "2rem", md: "2.5rem", lg: "3rem" },
+                  fontSize: { xs: "1.5rem", md: "2em", lg: "3.00rem" },
                 }}
               >
-                Welcome to HeartOmicsAtlas
+                Mapping the molecular architecture of the human sinoatrial node
               </Typography>
 
               <Typography
@@ -91,11 +91,7 @@ export default function Home() {
                   fontSize: { xs: "0.95rem", md: "1.05rem" },
                 }}
               >
-                HeartOmicsAtlas is an AI-powered, user-friendly, 
-                open-access platform for analyzing spatial and single-nucleus 
-                (sn-)multiomics data. It features spatial transcriptomics 
-                and sn-multiomics datasets from fetal heart samples, as well 
-                as scRNA-seq data split into three subchannels.
+                An interactive atlas for spatial single cell, and scMultiomics data Powered by AI assistant
               </Typography>
 
               <Stack direction="row" spacing={2}>
@@ -157,7 +153,7 @@ export default function Home() {
       </Box>
 
       {/* Second Section - What does HeartOmicsAtlas Include? */}
-      <Box sx={{ px: "6.7%", py: 6 }}>
+      <Box sx={{ px: "7.7%", py: 6 }}>
         {/* Section Title */}
         <Typography
           variant="h4"
@@ -178,23 +174,22 @@ export default function Home() {
             backgroundColor: "#FAF8FD",
             borderRadius: "12px",
             boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
-            py: 5,
-            px: 4,
+            py: 2,
+            px: 6,
           }}
         >
-          {/* Three items centered horizontally */}
+          {/* Three items spaced across full width */}
           <Stack
             direction="row"
-            justifyContent="center"
+            justifyContent="space-between"
             alignItems="center"
-            spacing={28}
           >
             {featureItems.map((item, index) => (
               <Stack
                 key={index}
                 direction="row"
                 alignItems="center"
-                spacing={2}
+                spacing={1.5}
               >
                 {/* Placeholder image box - replace with actual images */}
                 <Box
@@ -202,8 +197,8 @@ export default function Home() {
                   src={item.image}
                   alt={item.text}
                   sx={{
-                    width: 64,
-                    height: 64,
+                    width: 78,
+                    height: 78,
                     borderRadius: "8px",
                     objectFit: "contain",
                   }}
@@ -224,13 +219,13 @@ export default function Home() {
       </Box>
 
       {/* Third Section - How Researchers Use HeartOmicsAtlas */}
-      <Box sx={{ px: "6.7%", py: 6 }}>
+      <Box sx={{ px: "7.7%", py: 2 }}>
         {/* Section Title */}
         <Typography
           variant="h4"
           sx={{
             fontWeight: 700,
-            mb: 6,
+            mb: 4,
             textAlign: "center",
             color: "#000000",
           }}

@@ -119,7 +119,7 @@ export default function AppShell({ children }: PropsWithChildren) {
           boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
         }}
       >
-        <Box sx={{ px: "6.7%" }}>
+        <Box sx={{ px: "7.7%" }}>
           <Toolbar disableGutters sx={{ height: 64 }}>
             {/* Left - 50% width */}
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ width: "50%" }}>
@@ -128,12 +128,12 @@ export default function AppShell({ children }: PropsWithChildren) {
                 src={logo}
                 alt="HeartOmicsAtlas logo"
                 sx={{
-                  width: 42,
-                  height: 42,
+                  width: 52,
+                  height: 52,
                   display: "block",
                 }}
               />
-              <Typography variant="h6" component="span" sx={{ fontWeight: 700, letterSpacing: 0.3 }}>
+              <Typography variant="h5" component="span" sx={{ fontWeight: '900', letterSpacing: 0.3 }}>
                 <Box component="span" sx={{ color: "#000000" }}>Heart</Box>
                 <Box component="span" sx={{ color: "#BE1B23" }}>Omics</Box>
                 <Box component="span" sx={{ color: "#000000" }}>Atlas</Box>
@@ -209,7 +209,7 @@ export default function AppShell({ children }: PropsWithChildren) {
         }}
       >
         {/* Working area */}
-        <Box sx={{ px: "6.7%" }}>
+        <Box sx={{ px: "7.7%" }}>
           {/* Top section: Contact */}
           <Box
             sx={{

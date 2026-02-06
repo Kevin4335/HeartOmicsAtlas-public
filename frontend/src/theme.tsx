@@ -32,6 +32,7 @@ export function createAppTheme(_mode: "light" | "dark") {
 
     typography: {
       fontFamily: [
+        "Effra Trial",
         "Inter",
         "system-ui",
         "-apple-system",
