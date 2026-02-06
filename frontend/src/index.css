@@ -1,3 +1,13 @@
+/* Effra Trial - Light */
+@font-face {
+  font-family: 'Effra Trial';
+  src: url('./assets/fonts/Effra_Trial_Lt.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Effra Trial - Regular */
 @font-face {
   font-family: 'Effra Trial';
   src: url('./assets/fonts/Effra_Trial_Rg.ttf') format('truetype');
@@ -6,10 +16,47 @@
   font-display: swap;
 }
 
+/* Effra Trial - Medium */
 @font-face {
   font-family: 'Effra Trial';
-  src: url('./assets/fonts/Effra_Trial_Rg.ttf') format('truetype');
+  src: url('./assets/fonts/Effra_Trial_Md.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Effra Trial - Semi-Bold */
+@font-face {
+  font-family: 'Effra Trial';
+  src: url('./assets/fonts/Effra_Trial_SBd.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Effra Trial - Bold */
+@font-face {
+  font-family: 'Effra Trial';
+  src: url('./assets/fonts/Effra_Trial_Bd.ttf') format('truetype');
   font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Effra Trial - Extra Bold */
+@font-face {
+  font-family: 'Effra Trial';
+  src: url('./assets/fonts/Effra_Trial_XBd.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Effra Trial - Black */
+@font-face {
+  font-family: 'Effra Trial';
+  src: url('./assets/fonts/Effra_Trial_Blk.ttf') format('truetype');
+  font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
