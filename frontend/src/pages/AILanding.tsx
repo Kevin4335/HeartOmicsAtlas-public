@@ -39,8 +39,8 @@ export default function AILanding() {
         display: "flex",
         flexDirection: "column",
         backgroundImage: `url(${mainBackground})`,
-        backgroundSize: "120% auto",
-        backgroundPosition: "20% 20%",
+        backgroundSize: "130% auto",
+        backgroundPosition: "30% 30%",
         backgroundRepeat: "no-repeat",
       }}
     >
@@ -140,7 +140,6 @@ export default function AILanding() {
         <Box
           sx={{
             width: "59%",
-            mt: 3,
           }}
         >
           <Typography
