@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { Box, InputBase, Typography, Collapse, IconButton, keyframes } from "@mui/material";
+import { Box, InputBase, Typography, Collapse, IconButton, Stack, keyframes } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import AddIcon from "@mui/icons-material/Add";
@@ -86,7 +86,7 @@ const BACKEND_URLS = {
 
 // Main data types
 const dataTypes = [
-  { id: "multiomics", label: "Multiomics", image: multiomicsImg },
+  { id: "multiomics", label: "scMultiomics", image: multiomicsImg },
   { id: "spatial", label: "Spatial Transcriptomics", image: spatialImg },
   { id: "scrna", label: "scRNA-seq", image: scrnaImg, expandable: true },
 ];
@@ -112,6 +112,8 @@ export default function ExploreResults() {
   const [selectedType, setSelectedType] = useState<string | null>(typeParam || null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
+  // Cache for loaded images - tracks which type+gene combos have been successfully loaded
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
 
   // Sync state with URL params when navigating back to this page
   useEffect(() => {
@@ -138,17 +140,27 @@ export default function ExploreResults() {
   };
 
   const imageUrl = getImageUrl();
+  const cacheKey = selectedType && gene ? `${selectedType}:${gene}` : null;
+  const isImageCached = cacheKey ? loadedImages[cacheKey] : false;
 
-  // Reset loading/error state when image URL changes
+  // Reset loading/error state when image URL changes (only if not cached)
   useEffect(() => {
-    if (imageUrl && gene) {
+    if (imageUrl && gene && !isImageCached) {
       setIsLoading(true);
       setHasError(false);
     } else {
       setIsLoading(false);
       setHasError(false);
     }
-  }, [imageUrl, gene]);
+  }, [imageUrl, gene, isImageCached]);
+
+  // Mark image as cached when loaded
+  const handleImageLoad = () => {
+    setIsLoading(false);
+    if (cacheKey) {
+      setLoadedImages(prev => ({ ...prev, [cacheKey]: true }));
+    }
+  };
 
   const handleSearch = () => {
     const query = searchValue.trim();
@@ -192,7 +204,6 @@ export default function ExploreResults() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         backgroundColor: "#ffffff",
@@ -201,18 +212,18 @@ export default function ExploreResults() {
       {/* Main content area */}
       <Box
         sx={{
-          flex: 1,
           display: "flex",
           px: "14%",
           pt: "6vh",
-          pb: 4,
+          pb: 1,
           gap: "3.73%",
         }}
       >
-        {/* Left side - 18.1% of screen width */}
+        {/* Left side - 18.1% of screen width, same height as right side */}
         <Box
           sx={{
             width: "18.1vw",
+            height: "70vh",
             flexShrink: 0,
             display: "flex",
             flexDirection: "column",
@@ -227,7 +238,7 @@ export default function ExploreResults() {
               borderRadius: "50px",
               boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
               overflow: "hidden",
-              mb: 3,
+              mb: 0.5,
               border: hasSearchValue ? "none" : "2px solid #C30F1A",
             }}
           >
@@ -269,8 +280,28 @@ export default function ExploreResults() {
             </Box>
           </Box>
 
+          {/* Example gene pips */}
+          <Stack direction="row" spacing={1} sx={{ mb: 1.5, mt: 0.5, width: "100%" }}>
+            {["TNNT2", "MYH7", "SCN5A"].map((g) => (
+              <Box
+                key={g}
+                sx={{
+                  flex: 1,
+                  py: 0.4,
+                  backgroundColor: "#f5f5f5",
+                  borderRadius: "4px",
+                  fontSize: "0.7rem",
+                  color: "#888888",
+                  textAlign: "center",
+                }}
+              >
+                {g}
+              </Box>
+            ))}
+          </Stack>
+
           {/* Data type items */}
-          <Box sx={{ flex: 1 }}>
+          <Box>
             {dataTypes.map((type) => (
               <Box key={type.id}>
                 {/* Main item */}
@@ -279,15 +310,21 @@ export default function ExploreResults() {
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    py: 1.5,
+                    py: 1,
+                    px: 1,
+                    mx: -1,
+                    borderRadius: "8px",
                     cursor: "pointer",
+                    "&:hover": {
+                      backgroundColor: "rgba(195, 15, 26, 0.06)",
+                    },
                   }}
                 >
                   <Box
                     component="img"
                     src={type.image}
                     alt={type.label}
-                    sx={{ width: 32, height: 32, mr: 1.5, objectFit: "contain" }}
+                    sx={{ width: 32, height: 32, mr: 1.5, objectFit: "contain", borderRadius: "8px" }}
                   />
                   <Typography
                     sx={{
@@ -317,9 +354,15 @@ export default function ExploreResults() {
                           key={subtype.id}
                           onClick={() => handleSubtypeClick(subtype.id)}
                           sx={{
-                            py: 1,
+                            py: 0.7,
                             pl: 2,
+                            pr: 1,
+                            mr: -1,
+                            borderRadius: "8px",
                             cursor: "pointer",
+                            "&:hover": {
+                              backgroundColor: "rgba(195, 15, 26, 0.06)",
+                            },
                           }}
                         >
                           <Typography
@@ -341,7 +384,7 @@ export default function ExploreResults() {
           </Box>
 
           {/* Instructions at bottom */}
-          <Box sx={{ mt: "auto", pt: 4 }}>
+          <Box sx={{ mt: "auto" }}>
             <Typography sx={{ fontSize: "0.8rem", color: "#000000", lineHeight: 1.6 }}>
               Instructions:
             </Typography>
@@ -366,25 +409,28 @@ export default function ExploreResults() {
             borderRadius: "12px",
             overflow: "hidden",
             position: "relative",
-            // Static color when not loading, animated gradient when loading
-            ...(isLoading
-              ? {
-                  background: "linear-gradient(-45deg, #FFD7CE 0%, #FFF2F3 25%, #FFD7CE 50%, #FFF2F3 75%, #FFD7CE 100%)",
-                  backgroundSize: "400% 400%",
-                  animation: `${gradientAnimation} 4s ease-in-out infinite`,
-                }
-              : {
-                  backgroundColor: "#FFF2F3",
-                }),
+            backgroundColor: "#FFF2F3",
           }}
         >
-          {isLoading ? (
-            // Loading state with animated dots
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>
+          {/* Loading overlay - shown on top of image while loading */}
+          {isLoading && (
+            <Box
+              sx={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 5,
+                background: "linear-gradient(-45deg, #FFD7CE 0%, #FFF2F3 25%, #FFD7CE 50%, #FFF2F3 75%, #FFD7CE 100%)",
+                backgroundSize: "400% 400%",
+                animation: `${gradientAnimation} 4s ease-in-out infinite`,
+              }}
+            >
               <Typography
                 sx={{
                   color: "#C30F1A",
-                  fontSize: "1.5rem",
+                  fontSize: "0.95rem",
                   fontWeight: 500,
                   "&::after": {
                     content: '"."',
@@ -395,20 +441,25 @@ export default function ExploreResults() {
                 Loading
               </Typography>
             </Box>
-          ) : hasError ? (
-            // Error state
+          )}
+
+          {/* Error state */}
+          {hasError && !isLoading && (
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>
               <Typography
                 sx={{
                   color: "#C30F1A",
-                  fontSize: "1.5rem",
+                  fontSize: "0.95rem",
                   fontWeight: 500,
                 }}
               >
                 Error
               </Typography>
             </Box>
-          ) : imageUrl ? (
+          )}
+
+          {/* Image viewer - always rendered when imageUrl exists so onLoad can fire */}
+          {imageUrl && !hasError && (
             // Show image in zoom/pan viewer
             <TransformWrapper
               key={imageUrl}
@@ -443,7 +494,7 @@ export default function ExploreResults() {
                         display: "block",
                         userSelect: "none",
                       }}
-                      onLoad={() => setIsLoading(false)}
+                      onLoad={handleImageLoad}
                       onError={() => {
                         setIsLoading(false);
                         setHasError(true);
@@ -474,6 +525,12 @@ export default function ExploreResults() {
                         "&:hover": {
                           backgroundColor: "#fff5f5",
                         },
+                        "&:focus": {
+                          outline: "none",
+                        },
+                        "&:focus-visible": {
+                          outline: "none",
+                        },
                       }}
                     >
                       <RemoveIcon fontSize="small" />
@@ -488,6 +545,12 @@ export default function ExploreResults() {
                         color: "#C30F1A",
                         "&:hover": {
                           backgroundColor: "#fff5f5",
+                        },
+                        "&:focus": {
+                          outline: "none",
+                        },
+                        "&:focus-visible": {
+                          outline: "none",
                         },
                       }}
                     >
@@ -519,7 +582,23 @@ export default function ExploreResults() {
                 </>
               )}
             </TransformWrapper>
-          ) : null}
+          )}
+
+          {/* Label showing current gene or default */}
+          {imageUrl && !isLoading && !hasError && (
+            <Typography
+              sx={{
+                position: "absolute",
+                bottom: 16,
+                left: 16,
+                fontSize: "0.7rem",
+                color: "#aaaaaa",
+                zIndex: 10,
+              }}
+            >
+              showing {gene || "default"}
+            </Typography>
+          )}
         </Box>
       </Box>
 
@@ -527,7 +606,8 @@ export default function ExploreResults() {
       <Box
         component="footer"
         sx={{
-          py: 2,
+          pt: 3,
+          pb: 2,
           textAlign: "center",
         }}
       >

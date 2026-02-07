@@ -20,8 +20,11 @@ export default function ExploreAtlas() {
   const handleSearch = (gene?: string) => {
     const query = gene || searchValue.trim();
     if (query) {
-      // Navigate to results page (to be implemented)
+      // Navigate to results page with gene
       navigate(`/explore/results?gene=${encodeURIComponent(query)}`);
+    } else {
+      // Navigate to results page without gene (shows defaults)
+      navigate("/explore/results");
     }
   };
 

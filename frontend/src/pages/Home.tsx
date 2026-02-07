@@ -73,7 +73,7 @@ export default function Home() {
               <Typography
                 variant="h3"
                 sx={{
-                  fontWeight: 700,
+                  fontWeight: 600,
                   color: "#000000",
                   mb: 2,
                   fontSize: { xs: "1.5rem", md: "2em", lg: "3.00rem" },
@@ -104,14 +104,21 @@ export default function Home() {
                     fontSize: "1rem",
                     fontWeight: 600,
                     textTransform: "none",
-                    minWidth: 180,
+                    minWidth: 200,
+                    background: "linear-gradient(90deg, #C30F1A 0%, #FD441E 100%)",
+                    boxShadow: "0 4px 12px rgba(195, 15, 26, 0.3)",
+                    border: "none",
+                    "&:hover": {
+                      background: "linear-gradient(90deg, #a00d16 0%, #e03d1a 100%)",
+                      boxShadow: "0 6px 16px rgba(195, 15, 26, 0.4)",
+                    },
                   }}
-                  onClick={() => navigate("/chat")}
+                  onClick={() => navigate("/explore")}
                 >
-                  Chat with AI
+                  Start exploring the atlas
                 </Button>
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   sx={{
                     borderRadius: "6px",
                     px: 4,
@@ -119,17 +126,19 @@ export default function Home() {
                     fontSize: "1rem",
                     fontWeight: 600,
                     textTransform: "none",
-                    minWidth: 180,
-                    borderColor: "#000000",
+                    minWidth: 200,
+                    backgroundColor: "#ffffff",
                     color: "#000000",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                    border: "none",
                     "&:hover": {
-                      borderColor: "#000000",
-                      backgroundColor: "rgba(0, 0, 0, 0.04)",
+                      backgroundColor: "#fafafa",
+                      boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
                     },
                   }}
-                  onClick={() => navigate("/st")}
+                  onClick={() => navigate("/chat")}
                 >
-                  Explore Data
+                  Ask the AI assistant
                 </Button>
               </Stack>
             </Box>
@@ -158,14 +167,16 @@ export default function Home() {
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 700,
+            fontWeight: 400,
             mb: 4,
             textAlign: "center",
           }}
         >
-          <Box component="span" sx={{ color: "#000000" }}>What does Heart</Box>
-          <Box component="span" sx={{ color: "#BE1B23" }}>Omics</Box>
-          <Box component="span" sx={{ color: "#000000" }}>Atlas Include?</Box>
+          What data does{" "}
+          <Box component="span" sx={{ color: "#000000", fontWeight: 600 }}>Heart</Box>
+          <Box component="span" sx={{ color: "#BE1B23", fontWeight: 600 }}>Omics</Box>
+          <Box component="span" sx={{ color: "#000000", fontWeight: 600 }}>Atlas</Box>
+          {" "}Include?
         </Typography>
 
         {/* Feature Card */}
@@ -174,7 +185,7 @@ export default function Home() {
             backgroundColor: "#FAF8FD",
             borderRadius: "12px",
             boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
-            py: 2,
+            py: 3,
             px: 6,
           }}
         >
@@ -207,7 +218,7 @@ export default function Home() {
                   sx={{
                     color: "#000000",
                     fontWeight: 500,
-                    fontSize: "1rem",
+                    fontSize: "1.15rem",
                   }}
                 >
                   {item.text}
@@ -224,16 +235,16 @@ export default function Home() {
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 700,
+            fontWeight: 400,
             mb: 4,
             textAlign: "center",
             color: "#000000",
           }}
         >
-          How Researchers Use 
-          <Box component="span" sx={{ color: "#000000" }}>What does Heart</Box>
-          <Box component="span" sx={{ color: "#BE1B23" }}>Omics</Box>
-          <Box component="span" sx={{ color: "#000000" }}>Atlas.</Box>
+          How researchers use{" "}
+          <Box component="span" sx={{ color: "#000000", fontWeight: 600 }}>Heart</Box>
+          <Box component="span" sx={{ color: "#BE1B23", fontWeight: 600 }}>Omics</Box>
+          <Box component="span" sx={{ color: "#000000", fontWeight: 600 }}>Atlas</Box>
         </Typography>
 
         {/* Cards with arrows - 5 flex items: card, arrow, card, arrow, card */}
@@ -280,7 +291,7 @@ export default function Home() {
                   <Typography
                     sx={{
                       color: "#ffffff",
-                      fontWeight: 700,
+                      fontWeight: 600,
                       fontSize: "1.25rem",
                     }}
                   >
@@ -295,7 +306,7 @@ export default function Home() {
                     backgroundColor: "#FAF8FD",
                     borderRadius: "16px",
                     boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
-                    px: 2,
+                    px: 4,
                     py: 1.5,
                     display: "flex",
                     flexDirection: "column",
@@ -312,7 +323,7 @@ export default function Home() {
                       width: "70%",
                       height: "auto",
                       objectFit: "contain",
-                      mb: 2,
+                      mb: 1.5,
                     }}
                   />
 
@@ -320,10 +331,10 @@ export default function Home() {
                   <Typography
                     variant="h5"
                     sx={{
-                      fontWeight: 700,
+                      fontWeight: 600,
                       color: "#000000",
                       textAlign: "center",
-                      mb: 1,
+                      mb: 2,
                     }}
                   >
                     {step.title}
@@ -332,10 +343,10 @@ export default function Home() {
                   {/* Subtitle */}
                   <Typography
                     sx={{
-                      fontSize: "1rem",
+                      fontSize: "1.35rem",
                       color: "#666666",
                       textAlign: "center",
-                      lineHeight: 1.5,
+                      lineHeight: 1.6,
                     }}
                   >
                     {step.subtitle}
@@ -356,7 +367,7 @@ export default function Home() {
                 >
                   <DoubleArrowIcon
                     sx={{
-                      color: "#FFD280", // Lighter orange-yellow color
+                      color: "#FFB797",
                       fontSize: 80,
                       transform: "scaleY(2)", // Stretch vertically to make it very tall
                     }}

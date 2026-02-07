@@ -73,7 +73,7 @@ export default function AppShell({ children }: PropsWithChildren) {
   const location = useLocation();
   
   // Pages that should hide the full footer (they have their own simplified footer)
-  const hideFooter = location.pathname.startsWith("/explore");
+  const hideFooter = location.pathname.startsWith("/explore") || location.pathname.startsWith("/chat");
 
   return (
     <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", backgroundColor: "#ffffff" }}>
@@ -110,7 +110,7 @@ export default function AppShell({ children }: PropsWithChildren) {
             <Stack direction="row" spacing={2} alignItems="center" justifyContent="flex-end" sx={{ width: "50%" }}>
               <NavLink to="/" label="Home" />
               <NavLink to="/explore" label="Explore Atlas" />
-              <NavLink to="/chat" label="Chat with AI" />
+              <NavLink to="/chat" label="AI Assistant" />
             </Stack>
           </Toolbar>
         </Box>
