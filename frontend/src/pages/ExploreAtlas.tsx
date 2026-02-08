@@ -11,7 +11,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import mainBackground from "../assets/main_background.svg";
 
 // Example genes for the buttons
-const exampleGenes = ["TNNT2", "MYH7", "SCN5A"];
+const exampleGenes = ["SHOX2", "MYL2", "STMN2"];
 
 export default function ExploreAtlas() {
   const navigate = useNavigate();
