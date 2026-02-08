@@ -98,6 +98,19 @@ const scrnaSubtypes = [
   { id: "mini_heart", label: "Mini-heart" },
 ];
 
+const EXAMPLE_GENES: Record<string, string[]> = {
+  spatial: ["SHOX2", "MYH11", "MYL7", "PLP1"],
+  multiomics: ["TBX5", "NPPA", "MYL2", "SYN3"],
+
+  // scRNA-seq subtypes
+  acm_vcm_san: ["SHOX2", "NPPA", "CDH5", "STMN2"],
+  san_pco: ["SHOX2", "NPPA", "CDH5", "STMN2"],
+  mini_heart: ["SHOX2", "NPPA", "CDH5", "STMN2"],
+
+  // optional fallback if nothing selected
+  default: ["TNNT2", "MYH7", "SCN5A"],
+};
+
 export default function ExploreResults() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -282,9 +295,16 @@ export default function ExploreResults() {
 
           {/* Example gene pips */}
           <Stack direction="row" spacing={1} sx={{ mb: 1.5, mt: 0.5, width: "100%" }}>
-            {["TNNT2", "MYH7", "SCN5A"].map((g) => (
+            {(EXAMPLE_GENES[selectedType ?? "default"] ?? EXAMPLE_GENES.default).map((g) => (
               <Box
                 key={g}
+                onClick={() => {
+                  setSearchValue(g);
+                  const params = new URLSearchParams(searchParams);
+                  params.set("gene", g);
+                  if (selectedType) params.set("type", selectedType);
+                  navigate(`/explore/results?${params.toString()}`);
+                }}
                 sx={{
                   flex: 1,
                   py: 0.4,
@@ -293,6 +313,9 @@ export default function ExploreResults() {
                   fontSize: "0.7rem",
                   color: "#888888",
                   textAlign: "center",
+                  cursor: "pointer",
+                  userSelect: "none",
+                  "&:hover": { backgroundColor: "#eeeeee" },
                 }}
               >
                 {g}
