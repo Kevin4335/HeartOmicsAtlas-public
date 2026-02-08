@@ -15,6 +15,9 @@ import { ButtonBase, Stack, Divider } from "@mui/material";
 import geneIcon from "../assets/chat_geneicon.png";
 import spatialIcon from "../assets/chat_spatialreasoningicon.png";
 import hypIcon from "../assets/chat_hypothesissupicon.png";
+import CircularProgress from "@mui/material/CircularProgress";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import Linkify from "linkify-react";
 
 // ----------------------
 // Types
@@ -237,7 +240,26 @@ export default function AIChat() {
     closeWhatToAsk();
   };
   
+  const [thinkingStep, setThinkingStep] = useState<0 | 1 | 2 | 3>(0);
   
+  useEffect(() => {
+    if (!waiting) {
+      setThinkingStep(0);
+      return;
+    }
+  
+    setThinkingStep(1);
+  
+    const t1 = window.setTimeout(() => setThinkingStep(2), 650);
+    const t2 = window.setTimeout(() => setThinkingStep(3), 1400);
+  
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+    };
+  }, [waiting]);
+  
+
   return (
     <Box
       sx={{
@@ -378,7 +400,15 @@ export default function AIChat() {
                           wordBreak: "break-word",
                         }}
                       >
-                        {msg.content}
+                        <Linkify
+                          options={{
+                            target: "_blank",
+                            rel: "noopener noreferrer",
+                            className: "ai-link",
+                          }}
+                        >
+                          {msg.content}
+                        </Linkify>
                       </Typography>
                     )}
                   </Box>
@@ -394,23 +424,59 @@ export default function AIChat() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "flex-start",
+                gap: 1,
               }}
             >
-              <FavoriteIcon
-                sx={{
-                  color: "#BE1B23",
-                  fontSize: 24,
-                  mb: 1,
-                }}
-              />
-              <Typography
-                sx={{
-                  fontSize: "0.85rem",
-                  color: "#888888",
-                }}
-              >
+              <FavoriteIcon sx={{ color: "#BE1B23", fontSize: 24, mb: 0.5 }} />
+
+              <Typography sx={{ fontSize: "0.9rem", color: "#777777", mb: 0.5 }}>
                 Thinking...
               </Typography>
+
+              <Stack spacing={0.8} sx={{ pl: 0.2 }}>
+                {/* STEP 1 */}
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {thinkingStep === 1 && (
+                    <CircularProgress size={18} thickness={5} sx={{ color: "#7A7A7A" }} />
+                  )}
+                  {thinkingStep >= 2 && (
+                    <CheckCircleRoundedIcon sx={{ fontSize: 18, color: "#7A7A7A" }} />
+                  )}
+                  {thinkingStep === 0 && <Box sx={{ width: 18, height: 18 }} />}
+
+                  <Typography sx={{ fontSize: "0.85rem", color: "#777777" }}>
+                    Message received and being processed
+                  </Typography>
+                </Box>
+
+                {/* STEP 2 */}
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {thinkingStep === 2 && (
+                    <CircularProgress size={18} thickness={5} sx={{ color: "#7A7A7A" }} />
+                  )}
+                  {thinkingStep >= 3 && (
+                    <CheckCircleRoundedIcon sx={{ fontSize: 18, color: "#7A7A7A" }} />
+                  )}
+                  {thinkingStep < 2 && <Box sx={{ width: 18, height: 18 }} />}
+
+                  <Typography sx={{ fontSize: "0.85rem", color: "#777777" }}>
+                    Processing
+                  </Typography>
+                </Box>
+
+                {/* STEP 3 */}
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {thinkingStep === 3 ? (
+                    <CircularProgress size={18} thickness={5} sx={{ color: "#7A7A7A" }} />
+                  ) : (
+                    <Box sx={{ width: 18, height: 18 }} />
+                  )}
+
+                  <Typography sx={{ fontSize: "0.85rem", color: "#777777" }}>
+                    Formulating response
+                  </Typography>
+                </Box>
+              </Stack>
             </Box>
           )}
         </Box>
