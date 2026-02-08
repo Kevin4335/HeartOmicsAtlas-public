@@ -17,4 +17,5 @@ fragments-OLD/
 *.zip
 REFERENCE/
 venv
+.venv
 out.txt
