@@ -81,6 +81,13 @@ export default function AIChat() {
     setLightboxImage("");
   };
 
+  const clearHistory = () => {
+    if (waiting) return;
+    localStorage.setItem(LS_OPENAI, JSON.stringify([]));
+    localStorage.setItem(LS_DISPLAY, JSON.stringify([]));
+    setMessages([]);
+  };
+
   const simulateBackendResponse = async (content: string): Promise<BackendResponse> => {
     await new Promise((r) => setTimeout(r, 700));
     if (content.toLowerCase().includes("image") || content.toLowerCase().includes("png")) {
@@ -195,7 +202,34 @@ export default function AIChat() {
           alignItems: "center",
         }}
       >
+        {/* Welcome message when no messages */}
+        {messages.length === 0 && (
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              pb: "5%", // Move up 5%
+            }}
+          >
+            <Typography
+              sx={{
+                fontWeight: 600,
+                fontSize: "2rem",
+                textAlign: "center",
+              }}
+            >
+              <Box component="span" sx={{ color: "#000000" }}>Welcome to Heart</Box>
+              <Box component="span" sx={{ color: "#BE1B23" }}>Omics</Box>
+              <Box component="span" sx={{ color: "#000000" }}>Atlas </Box>
+              <Box component="span" sx={{ color: "#BE1B23" }}>AI</Box>
+            </Typography>
+          </Box>
+        )}
+
         {/* Messages container - same width as input (42.75%) */}
+        {messages.length > 0 && (
         <Box
           sx={{
             width: "42.75%",
@@ -322,6 +356,7 @@ export default function AIChat() {
             </Box>
           )}
         </Box>
+        )}
       </Box>
 
       {/* Chat input - fixed at bottom, centered */}
@@ -329,12 +364,59 @@ export default function AIChat() {
         sx={{
           position: "relative",
           display: "flex",
-          justifyContent: "center",
+          flexDirection: "column",
+          alignItems: "center",
           pb: 0,
           pt: 2,
           backgroundColor: "transparent",
         }}
       >
+        {/* Clear History button - above left side of input, only show when there are messages */}
+        {messages.length > 0 && (
+          <Box
+            sx={{
+              width: "42.75%",
+              display: "flex",
+              justifyContent: "flex-start",
+              mb: 1,
+              pl: 1, // Slight offset to the right
+            }}
+          >
+            <Button
+              variant="outlined"
+              onClick={clearHistory}
+              disabled={waiting}
+              sx={{
+                color: "#C30F1A",
+                borderColor: "#C30F1A",
+                backgroundColor: "#ffffff",
+                borderRadius: "50px",
+                textTransform: "none",
+                fontWeight: 500,
+                px: 2,
+                py: 0.5,
+                fontSize: "0.85rem",
+                "&:hover": {
+                  borderColor: "#C30F1A",
+                  backgroundColor: "#fff5f5",
+                },
+                "&:focus": {
+                  outline: "none",
+                },
+                "&:focus-visible": {
+                  outline: "none",
+                },
+                "&:disabled": {
+                  color: "#cccccc",
+                  borderColor: "#cccccc",
+                },
+              }}
+            >
+              Clear History
+            </Button>
+          </Box>
+        )}
+
         <Box
           sx={{
             width: "42.75%",
