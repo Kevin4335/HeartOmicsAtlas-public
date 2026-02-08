@@ -187,6 +187,20 @@ export default function AIChat() {
   }, []);
 
   const [whatToAskOpen, setWhatToAskOpen] = useState(false);
+  const [whatToAskMounted, setWhatToAskMounted] = useState(false);
+
+  const openWhatToAsk = () => {
+    setWhatToAskMounted(true);
+    // let it mount first, then animate in
+    requestAnimationFrame(() => setWhatToAskOpen(true));
+  };
+  
+  const closeWhatToAsk = () => {
+    setWhatToAskOpen(false);
+    // wait for transition to finish, then unmount
+    window.setTimeout(() => setWhatToAskMounted(false), 180);
+  };
+  
 
   const whatToAskSections = [
     {
@@ -220,7 +234,7 @@ export default function AIChat() {
   
   const handleAskSample = (q: string) => {
     setInput(q);          // just fill the chat box
-    setWhatToAskOpen(false);
+    closeWhatToAsk();
   };
   
   
@@ -529,7 +543,10 @@ export default function AIChat() {
         {/* "What to ask" button - pill shaped, in right margin, aligned with send button */}
         <Button
           variant="contained"
-          onClick={() => setWhatToAskOpen((v) => !v)}
+          onClick={() => {
+            if (whatToAskMounted) closeWhatToAsk();
+            else openWhatToAsk();
+          }}
           disableRipple
           disableFocusRipple
           sx={{
@@ -555,25 +572,26 @@ export default function AIChat() {
           What to Ask
         </Button>
 
-        {whatToAskOpen && (
-        <Box
-          sx={{
-            position: "absolute",
-
-            // anchors in the RIGHT MARGIN, exactly like your button
-            left: "calc(50% + 42.75%/2 + 16px)",
-            bottom: 60, // sits above the pill button
-
-            width: 280, // close to screenshot
-            maxHeight: "72vh",
-            overflowY: "auto",
-
-            // no big card background in the screenshot
-            backgroundColor: "transparent",
-            zIndex: 20,
-            pr: 0.5,
-          }}
-        >
+        {whatToAskMounted && (
+            <Box
+            sx={{
+              position: "absolute",
+              left: "calc(50% + 42.75%/2 + 16px)",
+              bottom: 60,
+              width: 280,
+              maxHeight: "72vh",
+              overflowY: "auto",
+              backgroundColor: "transparent",
+              zIndex: 20,
+              pr: 0.5,
+        
+              // animation
+              opacity: whatToAskOpen ? 1 : 0,
+              transform: whatToAskOpen ? "translateY(0px)" : "translateY(14px)",
+              transition: "opacity 180ms ease, transform 180ms ease",
+              pointerEvents: whatToAskOpen ? "auto" : "none",
+            }}
+          >
           <Typography
             sx={{
               fontWeight: 700,
@@ -616,7 +634,7 @@ export default function AIChat() {
                       sx={{
                         width: "100%",
                         borderRadius: "10px",
-                        backgroundColor: "#F6F6F8",
+                        backgroundColor: "#FAF8FD",
                         boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
                         px: 1.25,
                         py: 1.1,
@@ -625,7 +643,7 @@ export default function AIChat() {
                         justifyContent: "space-between",
                         gap: 1.25,
                         textAlign: "left",
-                        "&:hover": { backgroundColor: "#F1F1F5" },
+                        "&:hover": { backgroundColor: "#F2EEF9" },
 
                         outline: "none",
                         "&:focus": { outline: "none" },
