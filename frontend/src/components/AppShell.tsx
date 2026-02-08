@@ -159,21 +159,21 @@ export default function AppShell({ children }: PropsWithChildren) {
                   <Stack direction="row" spacing={1.1} alignItems="center">
                     <EmailOutlined sx={{ fontSize: 18, color: "white" }} />
                     <Typography sx={{ fontSize: 13, lineHeight: 1.3, color: "white" }}>
-                      chenlab@weill.cornell.edu
+                      shc2034@med.cornell.edu
                     </Typography>
                   </Stack>
 
                   <Stack direction="row" spacing={1.1} alignItems="center">
                     <PhoneOutlined sx={{ fontSize: 18, color: "white" }} />
                     <Typography sx={{ fontSize: 13, lineHeight: 1.3, color: "white" }}>
-                      +1 (000) 000-0000
+                      +1 (212) 746-5431
                     </Typography>
                   </Stack>
 
                   <Stack direction="row" spacing={1.1} alignItems="center">
                     <LocationOnOutlined sx={{ fontSize: 18, color: "white" }} />
                     <Typography sx={{ fontSize: 13, lineHeight: 1.3, color: "white" }}>
-                      Weill Cornell Medicine, New York, NY
+                      A827B, 1300 York Ave, New York, NY, 10065
                     </Typography>
                   </Stack>
                 </Stack>
@@ -189,7 +189,7 @@ export default function AppShell({ children }: PropsWithChildren) {
               }}
             >
               <Typography sx={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>
-                Copyright © Chen lab at Weill Cornell Medicine {new Date().getFullYear()} All rights reserved.
+                Copyright © 2026 - 2030 Chen Lab @ Weil Cornell Medicine. All rights reserved.
               </Typography>
             </Box>
           </Box>

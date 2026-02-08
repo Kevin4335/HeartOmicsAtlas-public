@@ -640,7 +640,7 @@ export default function ExploreResults() {
             color: "#888888",
           }}
         >
-          Copyright © Chen lab at Weill Cornell Medicine {new Date().getFullYear()} All rights reserved.
+          Copyright © 2026 - 2030 Chen Lab @ Weil Cornell Medicine. All rights reserved.
         </Typography>
       </Box>
     </Box>
