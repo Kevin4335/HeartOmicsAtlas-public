@@ -1,0 +1,8 @@
+myBasics
+mySecrets
+myHttp
+mySecrets
+PyMuPDF
+openai
+anthropic
+requests

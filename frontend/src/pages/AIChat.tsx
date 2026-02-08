@@ -11,7 +11,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ArrowOutwardOutlinedIcon from "@mui/icons-material/ArrowOutwardOutlined";
-import { ButtonBase, Stack, Divider } from "@mui/material";
+import { ButtonBase, Stack } from "@mui/material";
 import geneIcon from "../assets/chat_geneicon.png";
 import spatialIcon from "../assets/chat_spatialreasoningicon.png";
 import hypIcon from "../assets/chat_hypothesissupicon.png";

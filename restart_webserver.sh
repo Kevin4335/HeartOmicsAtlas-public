@@ -40,13 +40,13 @@ cd "$BASE_DIR"
 
 # Step 4: Start webserver in screen session
 echo "Step 4: Starting webserver in screen session..."
-# Use python3 (no sudo) when already root to avoid sudo TTY issues in screen
-if [ "$(id -u)" = "0" ]; then
-  PY_CMD="python3 server.py"
-else
-  PY_CMD="sudo python3 server.py"
-fi
-screen -L -Logfile /tmp/webserver_screen.log -dmS webserver bash -c "cd '$BASE_DIR' && exec $PY_CMD"
+screen -L -Logfile /tmp/webserver_screen.log -dmS webserver bash -lc "
+  set -e
+  cd '$BASE_DIR'
+  source '$BASE_DIR/venv/bin/activate'
+  python -c 'import sys; print(\"[BOOT]\", sys.executable)'
+  exec python server.py
+"
 sleep 2
 
 # Step 5: Verify server is running

@@ -3,6 +3,7 @@ from utils import *
 from mySecrets import hexToStr
 from openai import OpenAI
 from time import time
+from queue import Queue
 import json
 from random import randint
 from typing import Union, Literal, Tuple
@@ -18,6 +19,9 @@ import openai
 import requests
 from config import API_KEY
 from config import CHAT_KEY
+import os
+from typing import Tuple, Union, Literal, List
+
 __all__ = ['process_ai_chat']
 
 
@@ -118,8 +122,8 @@ Answer all the questions in the context of HeartOmicsAtlas. But you are still al
 
 Please output in json directly, without any other explantion. The outest later must be list. NO any additional json layer, NO any additional key or item."""
 
-
-LOG_PATH = '../openai_logs.txt'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_PATH = os.path.join(BASE_DIR, "openai_logs.txt")
 
 # Hash check - uncomment to verify prompt hasn't changed unexpectedly
 # New hash after updating for 3 scRNA subchannels (ACM_VCM_SAN, SAN-PCO, Mini-heart)
@@ -489,27 +493,17 @@ def process_ai_chat(request, path:str):
     request.wfile.flush()
     return
 
-log_file = None
 log_queue = Queue()
-
-try:
-    f = open(LOG_PATH, 'r')
-except:
-    log_file = open(LOG_PATH, 'w')
-if (log_file == None):
-    f.close()
-    log_file = open(LOG_PATH, 'a')
-    log_file.write('\n\n')
 
 
 def write_logs():
-    log_file.write(format(time() * 1000, '.3f') + ': Server started\n')
-    log_file.flush()
-    while True:
-        l = log_queue.get()
-        current_time = format(time() * 1000, '.3f')
-        l = current_time + ': ' + l + '\n'
-        log_file.write(l)
-        log_file.flush()
+    # open inside the thread so import-time failures don’t kill the server
+    with open(LOG_PATH, "a", encoding="utf-8") as f:
+        f.write(f"{time()*1000:.3f}: Server started!\n")
+        f.flush()
+        while True:
+            item = log_queue.get()
+            f.write(f"{time()*1000:.3f}: {item}\n")
+            f.flush()
 
 start_new_thread(write_logs, ())

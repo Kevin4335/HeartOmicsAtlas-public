@@ -72,6 +72,28 @@ def access_file(path: str, bin: bool):
     return data.decode('utf-8')
 
 class Request(BaseHTTPRequestHandler):
+    def do_HEAD(self):
+        try:
+            # simplest: behave like GET but do not write a body
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.end_headers()
+        except Exception:
+            # avoid noisy stack traces on random scanners
+            self.send_error(500)
+
+    def process_robots_txt(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"User-agent: *\nDisallow:\n")
+
+    def process_sitemap_xml(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "application/xml")
+        self.end_headers()
+        self.wfile.write(b'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>')
+
     def do_GET(self) -> None:
         path = self.path.split('?')[0]
         # React SPA: / and /index.html
@@ -397,7 +419,7 @@ class Request(BaseHTTPRequestHandler):
 
 pp = 9037
 if(IS_SERVER):
-    pp = 80
+    pp = 8000
 server = ThreadingHTTPServer(('0.0.0.0', pp), Request)
 start_new_thread(server.serve_forever, ())
 while True:

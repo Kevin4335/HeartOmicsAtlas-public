@@ -16,3 +16,5 @@ resources-OLD/
 fragments-OLD/
 *.zip
 REFERENCE/
+venv
+out.txt
