@@ -11,6 +11,10 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ArrowOutwardOutlinedIcon from "@mui/icons-material/ArrowOutwardOutlined";
+import { ButtonBase, Stack, Divider } from "@mui/material";
+import geneIcon from "../assets/chat_geneicon.png";
+import spatialIcon from "../assets/chat_spatialreasoningicon.png";
+import hypIcon from "../assets/chat_hypothesissupicon.png";
 
 // ----------------------
 // Types
@@ -26,6 +30,8 @@ type BackendResponse = {
   messages?: Array<{ type: "text" | "image"; content: string }>;
   history?: HistoryItem[];
 };
+
+
 
 // ----------------------
 // Config
@@ -180,6 +186,44 @@ export default function AIChat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [whatToAskOpen, setWhatToAskOpen] = useState(false);
+
+  const whatToAskSections = [
+    {
+      key: "gene",
+      title: "Gene-Level Queries",
+      icon: geneIcon,
+      questions: [
+        "What transcription factors are important for the development of the SAN?",
+        "Which types of genes distinguish SAN cells from atrial or ventricular cardiomyocytes?",
+      ],
+    },
+    {
+      key: "spatial",
+      title: "Spatial Reasoning",
+      icon: spatialIcon,
+      questions: [
+        "Why might the spatial relationship between SAN cells and surrounding atrial cells matter for heart rhythm?",
+        "What role does the location of the SAN play in integrating signals from the nervous system?",
+      ],
+    },
+    {
+      key: "hyp",
+      title: "Hypothesis Support",
+      icon: hypIcon,
+      questions: [
+        "How could stimulating the SAN with a drug support the idea that certain genes control pacemaker function?",
+        "If the SAN were moved to a different location in the heart, what would you hypothesize about its ability to control the heartbeat?",
+      ],
+    },
+  ] as const;
+  
+  const handleAskSample = (q: string) => {
+    setInput(q);          // just fill the chat box
+    setWhatToAskOpen(false);
+  };
+  
+  
   return (
     <Box
       sx={{
@@ -456,6 +500,8 @@ export default function AIChat() {
           <IconButton
             onClick={handleSend}
             disabled={waiting}
+            disableRipple
+            disableFocusRipple
             sx={{
               position: "absolute",
               bottom: 12,
@@ -463,48 +509,165 @@ export default function AIChat() {
               backgroundColor: "#C30F1A",
               width: 36,
               height: 36,
-              "&:hover": {
-                backgroundColor: "#a00d16",
-              },
-              "&:disabled": {
-                backgroundColor: "#cccccc",
-              },
+
+              // remove focus ring / persistent outline
+              outline: "none",
+              boxShadow: "none",
+              "&:focus": { outline: "none", boxShadow: "none" },
+              "&:focus-visible": { outline: "none", boxShadow: "none" },
+              "&.Mui-focusVisible": { outline: "none", boxShadow: "none" },
+
+              "&:hover": { backgroundColor: "#a00d16" },
+              "&:disabled": { backgroundColor: "#cccccc" },
             }}
           >
             <ArrowOutwardOutlinedIcon sx={{ color: "#ffffff", fontSize: 20 }} />
           </IconButton>
+
         </Box>
 
         {/* "What to ask" button - pill shaped, in right margin, aligned with send button */}
         <Button
-          variant="outlined"
+          variant="contained"
+          onClick={() => setWhatToAskOpen((v) => !v)}
+          disableRipple
+          disableFocusRipple
           sx={{
             position: "absolute",
-            left: "calc(50% + 42.75%/2 + 16px)", // Just to the right of input box
-            bottom: 12, // Aligned with send button (12px from input box bottom)
-            height: 36,
-            color: "#C30F1A",
-            borderColor: "#C30F1A",
-            backgroundColor: "#ffffff",
+            left: "calc(50% + 42.75%/2 + 16px)",
+            bottom: 12,
+            height: 32,
+            backgroundColor: "#C30F1A",
+            color: "#fff",
             borderRadius: "50px",
             textTransform: "none",
-            fontWeight: 500,
-            px: 2,
-            whiteSpace: "nowrap",
-            "&:hover": {
-              borderColor: "#C30F1A",
-              backgroundColor: "#fff5f5",
-            },
-            "&:focus": {
-              outline: "none",
-            },
-            "&:focus-visible": {
-              outline: "none",
-            },
+            fontWeight: 600,
+            px: 2.2,
+            boxShadow: "none",
+            "&:hover": { backgroundColor: "#a00d16", boxShadow: "none" },
+
+            outline: "none",
+            "&:focus": { outline: "none" },
+            "&:focus-visible": { outline: "none" },
+            "&.Mui-focusVisible": { outline: "none" },
           }}
         >
-          What to ask
+          What to Ask
         </Button>
+
+        {whatToAskOpen && (
+        <Box
+          sx={{
+            position: "absolute",
+
+            // anchors in the RIGHT MARGIN, exactly like your button
+            left: "calc(50% + 42.75%/2 + 16px)",
+            bottom: 60, // sits above the pill button
+
+            width: 280, // close to screenshot
+            maxHeight: "72vh",
+            overflowY: "auto",
+
+            // no big card background in the screenshot
+            backgroundColor: "transparent",
+            zIndex: 20,
+            pr: 0.5,
+          }}
+        >
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: "0.95rem",
+              textAlign: "center",
+              mb: 1.5,
+              color: "#111",
+            }}
+          >
+            What to Ask
+          </Typography>
+
+          <Stack spacing={2}>
+            {whatToAskSections.map((sec) => (
+              <Box key={sec.key}>
+                {/* Section header */}
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                  <Box
+                    component="img"
+                    src={sec.icon}
+                    alt=""
+                    sx={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                  />
+                  <Typography sx={{ fontWeight: 700, fontSize: "0.8rem", color: "#222" }}>
+                    {sec.title}
+                  </Typography>
+                </Box>
+
+                {/* Question bubbles */}
+                <Stack spacing={1.1}>
+                  {sec.questions.map((q) => (
+                    <ButtonBase
+                      key={q}
+                      onClick={() => handleAskSample(q)}
+                      sx={{
+                        width: "100%",
+                        borderRadius: "10px",
+                        backgroundColor: "#F6F6F8",
+                        boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+                        px: 1.25,
+                        py: 1.1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 1.25,
+                        textAlign: "left",
+                        "&:hover": { backgroundColor: "#F1F1F5" },
+
+                        outline: "none",
+                        "&:focus": { outline: "none" },
+                        "&:focus-visible": { outline: "none" },
+                        "&.Mui-focusVisible": { outline: "none" },
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontSize: "0.72rem",
+                          lineHeight: 1.25,
+                          color: "#666",
+                          pr: 0.5,
+                        }}
+                      >
+                        {q}
+                      </Typography>
+
+                      {/* Red circular send icon (matches screenshot) */}
+                      <ArrowOutwardOutlinedIcon
+                        sx={{
+                          color: "#C30F1A",
+                          fontSize: 16,
+                          flex: "0 0 auto",
+                          opacity: 0.85,
+                          transition: "opacity 0.15s ease",
+                          ".MuiButtonBase-root:hover &": {
+                            opacity: 1,
+                          },
+                        }}
+                      />
+                    </ButtonBase>
+                  ))}
+                </Stack>
+              </Box>
+            ))}
+          </Stack>
+        </Box>
+      )}
+
+
+        
       </Box>
 
       {/* Simple footer */}
