@@ -360,6 +360,47 @@ def glkb_chat(question: str) -> Tuple[bool, str]:
                         # Parse JSON payload
                         try:
                             obj = json.loads(data_str)
+                            step = obj.get("step")
+
+                            # Best: final answer from the server
+                            if step == "Complete":
+                                final_resp = obj.get("response")
+                                final_text = ""
+
+                                if isinstance(final_resp, str) and final_resp.strip():
+                                    final_text = final_resp.strip()
+
+                                # ---- references formatting ----
+                                refs = obj.get("references")
+                                if isinstance(refs, list) and refs:
+                                    ref_lines = []
+                                    for i, r in enumerate(refs[:10], start=1):
+                                        if not isinstance(r, list) or len(r) < 6:
+                                            continue
+
+                                        title = r[0] or "Untitled"
+                                        url = r[1] or ""
+                                        year = r[3] or ""
+                                        journal = r[4] or ""
+                                        authors = r[5] or []
+
+                                        # clean authors
+                                        if isinstance(authors, list):
+                                            authors = [a for a in authors if a.strip()]
+                                            author_str = ", ".join(authors[:5])
+                                            if len(authors) > 5:
+                                                author_str += " et al."
+                                        else:
+                                            author_str = ""
+
+                                        line = f"{i}. {title}\n   {author_str} ({year}) — {journal}\n   {url}"
+                                        ref_lines.append(line)
+
+                                    if ref_lines:
+                                        final_text += "\n\nReferences:\n" + "\n".join(ref_lines)
+
+                                return True, final_text.strip()
+
                         except json.JSONDecodeError:
                             # Some servers occasionally emit non-JSON keepalives
                             continue
