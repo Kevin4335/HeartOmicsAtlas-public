@@ -153,15 +153,15 @@ export default function AppShell({ children }: PropsWithChildren) {
           <Box sx={{ px: "14%" }}>
             {/* Top section: Contact */}
             <Box
-              sx={{
+                sx={{
                 display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "220px 1fr" },
+                gridTemplateColumns: { xs: "1fr", md: "160px 1fr" },
                 alignItems: "start",
-                columnGap: { xs: 2, md: 8 },
+                columnGap: { xs: 2, md: 4 },
                 rowGap: { xs: 2, md: 0 },
               }}
             >
-              <Typography sx={{ fontWeight: 800, fontSize: 16, lineHeight: 1.2 }}>
+              <Typography sx={{ fontWeight: 700, fontSize: 16, lineHeight: 1.2 }}>
                 Contact
               </Typography>
 
@@ -169,7 +169,7 @@ export default function AppShell({ children }: PropsWithChildren) {
               <Box
                 sx={{
                   justifySelf: { xs: "start", md: "start" },
-                  pl: { xs: 0, md: 4 }, // adjust this to move the block more right/left
+                  pl: { xs: 0, md: 8 }, // adjust this to move the block more right/left
                 }}
               >
                 <Stack spacing={1.1}>
