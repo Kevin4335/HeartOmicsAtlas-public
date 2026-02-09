@@ -516,7 +516,7 @@ def generate_messgae(resp: str) -> str:
                 else:
                     messages.append({
                         'type': 'text',
-                        'content': f'Ask GLKB AI assistant: {question}\n\nAnswer: {answer}'
+                        'content': f'Ask GLKB AI assistant: {question}\n\nAnswer:\n\n{answer}'
                     })
     return messages
             

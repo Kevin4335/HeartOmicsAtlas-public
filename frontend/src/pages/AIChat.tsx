@@ -17,7 +17,8 @@ import spatialIcon from "../assets/chat_spatialreasoningicon.png";
 import hypIcon from "../assets/chat_hypothesissupicon.png";
 import CheckIcon from "@mui/icons-material/Check";
 import CircularProgress from "@mui/material/CircularProgress";
-import Linkify from "linkify-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // ----------------------
 // Types
@@ -470,25 +471,93 @@ export default function AIChat() {
                         />
                       </Box>
                     ) : (
-                      <Typography
+                      <Box
                         sx={{
                           fontSize: "0.85rem",
                           lineHeight: 1.6,
                           color: "#000000",
-                          whiteSpace: "pre-wrap",
                           wordBreak: "break-word",
                         }}
                       >
-                        <Linkify
-                          options={{
-                            target: "_blank",
-                            rel: "noopener noreferrer",
-                            className: "ai-link",
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            a: ({ node, ...props }) => (
+                              <a {...props} target="_blank" rel="noopener noreferrer" className="ai-link" />
+                            ),
+                            p: ({ node, ...props }) => (
+                              <Typography component="p" sx={{ fontSize: "0.85rem", lineHeight: 1.6, mb: 1 }} {...props} />
+                            ),
+                            li: ({ node, ...props }) => (
+                              <li style={{ marginBottom: "0.25rem" }} {...props} />
+                            ),
+                            h1: ({ node, ...props }) => (
+                              <Typography component="h1" sx={{ fontSize: "1.15rem", fontWeight: 700, mt: 1.2, mb: 0.8 }} {...props} />
+                            ),
+                            h2: ({ node, ...props }) => (
+                              <Typography component="h2" sx={{ fontSize: "1.05rem", fontWeight: 700, mt: 1.1, mb: 0.7 }} {...props} />
+                            ),
+                            h3: ({ node, ...props }) => (
+                              <Typography component="h3" sx={{ fontSize: "0.98rem", fontWeight: 700, mt: 1.0, mb: 0.6 }} {...props} />
+                            ),
+                            pre: ({ children }) => (
+                            <Box
+                              component="pre"
+                              sx={{
+                                backgroundColor: "#f5f5f5",
+                                p: 1,
+                                borderRadius: "10px",
+                                overflowX: "auto",
+                                mt: 0.5,
+                                mb: 0.75,
+                              }}
+                            >
+                              {children}
+                            </Box>
+                          ),
+
+                          code: ({ className, children, ...props }) => {
+                            const isBlock =
+                              typeof className === "string" && className.includes("language-");
+
+                            // block code (```js etc)
+                            if (isBlock) {
+                              return (
+                                <Box
+                                  component="code"
+                                  className={className}
+                                  sx={{ fontSize: "0.82rem" }}
+                                  {...props}
+                                >
+                                  {children}
+                                </Box>
+                              );
+                            }
+
+                            // inline code
+                            return (
+                              <Box
+                                component="code"
+                                sx={{
+                                  backgroundColor: "#f5f5f5",
+                                  px: 0.4,
+                                  py: 0.1,
+                                  borderRadius: "6px",
+                                  fontSize: "0.82rem",
+                                }}
+                                {...props}
+                              >
+                                {children}
+                              </Box>
+                            );
+                          },
+
                           }}
                         >
                           {msg.content}
-                        </Linkify>
-                      </Typography>
+                        </ReactMarkdown>
+                      </Box>
+
                     )}
                   </Box>
                 </Box>
