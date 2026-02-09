@@ -15,29 +15,45 @@ import consultai from "../assets/consultai.png";
 import comparemodalities from "../assets/comparemodalities.png";
 import selectagene from "../assets/selectagene.png";
 
-//  3 feature items 
-const featureItems = [
-  { image: scrnaseq, text: "scRNA-seq" },
-  { image: spatialtrans, text: "Spatial Transcriptomics" },
-  { image: multiomics, text: "scMultiomics" },
+type LinkItem = {
+  image: string;
+  text: string;
+  to: string;
+};
+
+type StepItem = {
+  image: string;
+  title: string;
+  subtitle: string;
+  to: string;
+};
+
+// 3 feature items (small row) with links
+const featureItems: LinkItem[] = [
+  { image: scrnaseq, text: "scRNA-seq", to: "/explore/results?type=acm_vcm_san" },
+  { image: spatialtrans, text: "Spatial Transcriptomics", to: "/explore/results?type=spatial" },
+  { image: multiomics, text: "scMultiomics", to: "/explore/results?type=multiomics" },
 ];
 
-// Placeholder for the 3 "How Researchers Use" cards
-const researcherSteps = [
+// 3 researcher cards (large) with links
+const researcherSteps: StepItem[] = [
   {
     image: selectagene,
     title: "Search a gene",
     subtitle: "View expression across cell types and space",
+    to: "/explore",
   },
   {
     image: comparemodalities,
     title: "Compare modalities",
     subtitle: "View expression across scRNA, spatial, and scMultiomics",
+    to: "/explore/results",
   },
   {
     image: consultai,
     title: "Ask questions with AI",
     subtitle: "Interpret data patterns, support hypothesis generation",
+    to: "/chat",
   },
 ];
 
@@ -73,10 +89,10 @@ export default function Home() {
               <Typography
                 variant="h3"
                 sx={{
-                  fontWeight: 500,
+                  fontWeight: 600,
                   color: "#000000",
                   mb: 2,
-                  fontSize: { xs: "1rem", md: "1.5em", lg: "2.5rem" },
+                  fontSize: { xs: "1.5rem", md: "2em", lg: "3.00rem" },
                 }}
               >
                 Mapping the molecular architecture of the human sinoatrial node
@@ -109,14 +125,19 @@ export default function Home() {
                     boxShadow: "0 4px 12px rgba(195, 15, 26, 0.3)",
                     border: "none",
                     "&:hover": {
-                      background: "linear-gradient(90deg, #a00d16 0%, #e03d1a 100%)",
-                      boxShadow: "0 6px 16px rgba(195, 15, 26, 0.4)",
+                      background: "linear-gradient(90deg, #C30F1A 0%, #FD441E 100%)",
+                      boxShadow: "0 4px 12px rgba(195, 15, 26, 0.3)",
+                    },
+                    "&:active": {
+                      background: "linear-gradient(90deg, #C30F1A 0%, #FD441E 100%)",
+                      boxShadow: "0 4px 12px rgba(195, 15, 26, 0.3)",
                     },
                   }}
                   onClick={() => navigate("/explore")}
                 >
                   Start exploring the atlas
                 </Button>
+
                 <Button
                   variant="contained"
                   sx={{
@@ -132,8 +153,12 @@ export default function Home() {
                     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
                     border: "none",
                     "&:hover": {
-                      backgroundColor: "#fafafa",
-                      boxShadow: "0 6px 16px rgba(0, 0, 0, 0.15)",
+                      backgroundColor: "#ffffff",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                    },
+                    "&:active": {
+                      backgroundColor: "#ffffff",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
                     },
                   }}
                   onClick={() => navigate("/chat")}
@@ -149,19 +174,18 @@ export default function Home() {
               src={logo}
               alt="HeartOmicsAtlas Logo"
               sx={{
-                width: { xs: 0, lg: 204},
+                width: { xs: 0, lg: 204 },
                 height: "auto",
                 objectFit: "contain",
-                marginRight: '10vw',
-                display: { xs: "none", md: "block" }, // hide on mobile
+                marginRight: "10vw",
+                display: { xs: "none", md: "block" },
               }}
             />
           </Box>
         </Box>
-
       </Box>
 
-      {/* Second Section - What does HeartOmicsAtlas Include? */}
+      {/* Second Section - What data does HeartOmicsAtlas Include? */}
       <Box sx={{ px: "14%", py: 6 }}>
         {/* Section Title */}
         <Typography
@@ -173,10 +197,16 @@ export default function Home() {
           }}
         >
           What data does{" "}
-          <Box component="span" sx={{ color: "#000000", fontWeight: 600 }}>Heart</Box>
-          <Box component="span" sx={{ color: "#BE1B23", fontWeight: 600 }}>Omics</Box>
-          <Box component="span" sx={{ color: "#000000", fontWeight: 600 }}>Atlas</Box>
-          {" "}Include?
+          <Box component="span" sx={{ color: "#000000", fontWeight: 600 }}>
+            Heart
+          </Box>
+          <Box component="span" sx={{ color: "#BE1B23", fontWeight: 600 }}>
+            Omics
+          </Box>
+          <Box component="span" sx={{ color: "#000000", fontWeight: 600 }}>
+            Atlas
+          </Box>{" "}
+          Include?
         </Typography>
 
         {/* Feature Card */}
@@ -190,40 +220,57 @@ export default function Home() {
           }}
         >
           {/* Three items spaced across full width */}
-          <Stack
-            direction="row"
-            justifyContent="space-between"
-            alignItems="center"
-          >
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
             {featureItems.map((item, index) => (
-              <Stack
+              <Box
                 key={index}
-                direction="row"
-                alignItems="center"
-                spacing={1.5}
+                role="link"
+                tabIndex={0}
+                onClick={() => navigate(item.to)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") navigate(item.to);
+                }}
+                sx={{
+                  cursor: "pointer",
+                  userSelect: "none",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  outline: "none",
+                  borderRadius: "8px",
+                  "&:hover": {
+                    backgroundColor: "transparent",
+                  },
+                  "&:active": {
+                    backgroundColor: "transparent",
+                  },
+                  "&:focus-visible": {
+                    outline: "2px solid rgba(255,255,255,0.0)",
+                  },
+                }}
               >
-                {/* Placeholder image box - replace with actual images */}
-                <Box
-                  component="img"
-                  src={item.image}
-                  alt={item.text}
-                  sx={{
-                    width: 78,
-                    height: 78,
-                    borderRadius: "8px",
-                    objectFit: "contain",
-                  }}
-                />
-                <Typography
-                  sx={{
-                    color: "#000000",
-                    fontWeight: 500,
-                    fontSize: "1.15rem",
-                  }}
-                >
-                  {item.text}
-                </Typography>
-              </Stack>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                  <Box
+                    component="img"
+                    src={item.image}
+                    alt={item.text}
+                    sx={{
+                      width: 78,
+                      height: 78,
+                      borderRadius: "8px",
+                      objectFit: "contain",
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      color: "#000000",
+                      fontWeight: 500,
+                      fontSize: "1.15rem",
+                    }}
+                  >
+                    {item.text}
+                  </Typography>
+                </Stack>
+              </Box>
             ))}
           </Stack>
         </Box>
@@ -242,12 +289,18 @@ export default function Home() {
           }}
         >
           How researchers use{" "}
-          <Box component="span" sx={{ color: "#000000", fontWeight: 600 }}>Heart</Box>
-          <Box component="span" sx={{ color: "#BE1B23", fontWeight: 600 }}>Omics</Box>
-          <Box component="span" sx={{ color: "#000000", fontWeight: 600 }}>Atlas</Box>
+          <Box component="span" sx={{ color: "#000000", fontWeight: 600 }}>
+            Heart
+          </Box>
+          <Box component="span" sx={{ color: "#BE1B23", fontWeight: 600 }}>
+            Omics
+          </Box>
+          <Box component="span" sx={{ color: "#000000", fontWeight: 600 }}>
+            Atlas
+          </Box>
         </Typography>
 
-        {/* Cards with arrows - 5 flex items: card, arrow, card, arrow, card */}
+        {/* Cards with arrows */}
         <Box
           sx={{
             display: "flex",
@@ -258,26 +311,39 @@ export default function Home() {
           }}
         >
           {researcherSteps.map((step, index) => (
-            <Box 
-              key={index} 
-              sx={{ 
-                display: "contents", // Allows children to participate directly in parent flex
-              }}
-            >
-              {/* Card with overlapping red circle - flex: 3 (larger portion) */}
+            <Box key={index} sx={{ display: "contents" }}>
+              {/* Clickable Card wrapper */}
               <Box
+                role="link"
+                tabIndex={0}
+                onClick={() => navigate(step.to)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") navigate(step.to);
+                }}
                 sx={{
+                  cursor: "pointer",
+                  userSelect: "none",
+                  outline: "none",
+                  flex: 3,
                   position: "relative",
-                  pt: 3, // Space for the overlapping circle
-                  flex: 3, // Each card takes 3 parts
+                  pt: 3,
+                  "&:hover": {
+                    backgroundColor: "transparent",
+                  },
+                  "&:active": {
+                    backgroundColor: "transparent",
+                  },
+                  "&:focus-visible": {
+                    outline: "2px solid rgba(0,0,0,0)",
+                  },
                 }}
               >
-                {/* Red numbered circle - positioned to overlap top of card */}
+                {/* Red numbered circle */}
                 <Box
                   sx={{
                     position: "absolute",
                     top: 0,
-                    left: 40, // More to the right within the card
+                    left: 40,
                     width: 48,
                     height: 48,
                     borderRadius: "50%",
@@ -299,7 +365,7 @@ export default function Home() {
                   </Typography>
                 </Box>
 
-                {/* Card - slightly taller than wide */}
+                {/* Card */}
                 <Box
                   sx={{
                     aspectRatio: "1 / 1.1",
@@ -314,7 +380,6 @@ export default function Home() {
                     justifyContent: "center",
                   }}
                 >
-                  {/* Image - larger, takes more of the card area */}
                   <Box
                     component="img"
                     src={step.image}
@@ -327,7 +392,6 @@ export default function Home() {
                     }}
                   />
 
-                  {/* Title - similar size to section title */}
                   <Typography
                     variant="h5"
                     sx={{
@@ -340,7 +404,6 @@ export default function Home() {
                     {step.title}
                   </Typography>
 
-                  {/* Subtitle */}
                   <Typography
                     sx={{
                       fontSize: "1.35rem",
@@ -354,11 +417,11 @@ export default function Home() {
                 </Box>
               </Box>
 
-              {/* Arrow between cards (not after the last card) - flex: 1 (smaller portion) */}
+              {/* Arrow between cards */}
               {index < researcherSteps.length - 1 && (
                 <Box
                   sx={{
-                    flex: 1, // Each arrow takes 1 part
+                    flex: 1,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -369,7 +432,7 @@ export default function Home() {
                     sx={{
                       color: "#FFB797",
                       fontSize: 80,
-                      transform: "scaleY(2)", // Stretch vertically to make it very tall
+                      transform: "scaleY(2)",
                     }}
                   />
                 </Box>
