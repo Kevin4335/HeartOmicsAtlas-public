@@ -2,7 +2,7 @@ from R_http import *
 from utils import *
 from mySecrets import hexToStr
 from openai import OpenAI
-from time import time
+import time
 from queue import Queue
 import json
 from random import randint
@@ -20,6 +20,8 @@ import requests
 from config import API_KEY
 import os
 from typing import Tuple, Union, Literal, List
+import certifi
+import re
 
 __all__ = ['process_ai_chat']
 
@@ -134,8 +136,22 @@ client = anthropic.Client(api_key=API_KEY)
 
 rate_limit_records = []
 
+_FENCE_RE = re.compile(r"```(?:json)?\s*(.*?)\s*```", re.DOTALL | re.IGNORECASE)
+
+def strip_code_fences(s: str) -> str:
+    s = s.strip()
+    m = _FENCE_RE.search(s)
+    if m:
+        return m.group(1).strip()
+    # If it starts with ``` but doesn't match well, do a fallback strip
+    if s.startswith("```"):
+        s = re.sub(r"^```[a-zA-Z0-9_-]*\s*", "", s)
+        s = re.sub(r"\s*```$", "", s)
+    return s.strip()
+
+
 def within_rate_limit():
-    t = time()
+    t = time.time()
     for i in range(len(rate_limit_records)-1, -1, -1):
         if (t - rate_limit_records[i] > 3600):
             rate_limit_records.pop(i)
@@ -146,6 +162,7 @@ def within_rate_limit():
 
 
 def check_json_format(text: str) -> None:
+    text = strip_code_fences(text)
     data = json.loads(text, strict=False)
     assert (type(data) == list and len(data) > 0), "Outest layer must be list."
     text_cnt = 0
@@ -154,13 +171,13 @@ def check_json_format(text: str) -> None:
         if (type(msg) == dict):
             assert (type(msg['name']) == str and type(msg['parameters']) == list), '"name" should be a string, and "parameters" should be a list.'
         text_cnt += int(type(msg) == str)
-    assert (text_cnt <= 2 and text_cnt >= 1), "Your output should contain at most 2 text parts, and at least 1 text part."
-
+    assert (0 <= text_cnt <= 2), "Your output should contain at most 2 text parts."
 
 def check_format(resp: str) -> None:
     '''
     returns: (success, error_msg)
     '''
+    resp = strip_code_fences(resp)
     check_json_format(resp)
     resp = json.loads(resp, strict=False)
     for msg in resp:
@@ -229,6 +246,7 @@ def get_gpt_resp(history: list) -> Tuple[bool, str, str]:
                 system=PROMPT
             )
             result = response.content[0].text
+            result = strip_code_fences(result)
             print(result)
             log_queue.put(json.dumps({'history': history, 'response': result}, ensure_ascii=False))
         except:
@@ -271,8 +289,8 @@ def glkb_chat(question: str) -> Tuple[bool, str]:
     BACKOFF_S = 1.5
 
     # Prevent runaway memory if server goes wild
-    MAX_CHUNKS = 200
-    MAX_TOTAL_CHARS = 200_000  # 200k chars
+    MAX_CHUNKS = 1000
+    MAX_TOTAL_CHARS = 2_000_000  # 1 million
 
     payload = {"question": question, "messages": []}
 
@@ -286,6 +304,8 @@ def glkb_chat(question: str) -> Tuple[bool, str]:
                     json=payload,
                     stream=True,
                     timeout=(CONNECT_TIMEOUT_S, READ_TIMEOUT_S),
+                    #verify=certifi.where(),
+                    verify=False,
                     headers={
                         # Not strictly required, but makes intent explicit
                         "Accept": "text/event-stream",
@@ -402,6 +422,7 @@ def glkb_chat(question: str) -> Tuple[bool, str]:
 
 def generate_messgae(resp: str) -> str:
     messages = []
+    resp = strip_code_fences(resp)
     resp = json.loads(resp, strict=False)
     for msg in resp:
         if (type(msg) == str):
@@ -446,9 +467,16 @@ def generate_messgae(resp: str) -> str:
             elif (msg['name'] == 'glkb_ai_assistant'):
                 question = msg['parameters'][0]
                 success, answer = glkb_chat(question)
-                if (success == False):
-                    answer = 'Failed to get the answer from GLKB AI assistant.'
-                messages.append({'type': 'text', 'content': f'Ask GLKB AI assistant: {question}\n\nAnswer: {answer}'})
+                if not success:
+                    messages.append({
+                        'type': 'text',
+                        'content': f'GLKB call failed.\n\nError:\n{answer}'
+                    })
+                else:
+                    messages.append({
+                        'type': 'text',
+                        'content': f'Ask GLKB AI assistant: {question}\n\nAnswer: {answer}'
+                    })
     return messages
             
 
@@ -498,11 +526,11 @@ log_queue = Queue()
 def write_logs():
     # open inside the thread so import-time failures don’t kill the server
     with open(LOG_PATH, "a", encoding="utf-8") as f:
-        f.write(f"{time()*1000:.3f}: Server started!\n")
+        f.write(f"{time.time()*1000:.3f}: Server started!\n")
         f.flush()
         while True:
             item = log_queue.get()
-            f.write(f"{time()*1000:.3f}: {item}\n")
+            f.write(f"{time.time()*1000:.3f}: {item}\n")
             f.flush()
 
 start_new_thread(write_logs, ())
