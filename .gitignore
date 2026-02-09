@@ -21,3 +21,5 @@ venv
 out.txt
 .Rhistory
 .Rdata
+restart_webserver.sh
+restart_r_servers.sh
