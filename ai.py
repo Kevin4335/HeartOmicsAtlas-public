@@ -18,7 +18,6 @@ import secrets
 import openai
 import requests
 from config import API_KEY
-from config import CHAT_KEY
 import os
 from typing import Tuple, Union, Literal, List
 
