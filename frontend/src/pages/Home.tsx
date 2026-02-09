@@ -58,7 +58,7 @@ export default function Home() {
         }}
       >
         {/* Content container with margins */}
-        <Box sx={{ px: "7.7%" }}>
+        <Box sx={{ px: "14%" }}>
           {/* Flex row */}
           <Box
             sx={{
@@ -162,7 +162,7 @@ export default function Home() {
       </Box>
 
       {/* Second Section - What does HeartOmicsAtlas Include? */}
-      <Box sx={{ px: "7.7%", py: 6 }}>
+      <Box sx={{ px: "14%", py: 6 }}>
         {/* Section Title */}
         <Typography
           variant="h4"
@@ -230,7 +230,7 @@ export default function Home() {
       </Box>
 
       {/* Third Section - How Researchers Use HeartOmicsAtlas */}
-      <Box sx={{ px: "7.7%", py: 2 }}>
+      <Box sx={{ px: "14%", py: 2 }}>
         {/* Section Title */}
         <Typography
           variant="h4"

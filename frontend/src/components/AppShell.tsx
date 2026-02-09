@@ -85,7 +85,7 @@ export default function AppShell({ children }: PropsWithChildren) {
           boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
         }}
       >
-        <Box sx={{ px: "7.7%" }}>
+        <Box sx={{ px: "14%" }}>
           <Toolbar disableGutters sx={{ height: "8.82vh" }}>
             {/* Left - 50% width */}
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ width: "50%" }}>
@@ -111,6 +111,23 @@ export default function AppShell({ children }: PropsWithChildren) {
               <NavLink to="/" label="Home" />
               <NavLink to="/explore" label="Explore Atlas" />
               <NavLink to="/chat" label="AI Assistant" />
+
+              <Link
+                href="https://www.chen-stemcell-lab.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                underline="none"
+                sx={{
+                  color: "#000000",
+                  fontWeight: 500,
+                  fontSize: 15,
+                  px: 1.5,
+                  py: 0.5,
+                  textDecoration: "none",
+                }}
+              >
+                Chen Lab
+              </Link>
             </Stack>
           </Toolbar>
         </Box>
@@ -133,7 +150,7 @@ export default function AppShell({ children }: PropsWithChildren) {
           }}
         >
           {/* Working area */}
-          <Box sx={{ px: "7.7%" }}>
+          <Box sx={{ px: "14%" }}>
             {/* Top section: Contact */}
             <Box
               sx={{
