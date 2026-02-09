@@ -73,10 +73,10 @@ export default function Home() {
               <Typography
                 variant="h3"
                 sx={{
-                  fontWeight: 600,
+                  fontWeight: 500,
                   color: "#000000",
                   mb: 2,
-                  fontSize: { xs: "1.5rem", md: "2em", lg: "3.00rem" },
+                  fontSize: { xs: "1rem", md: "1.5em", lg: "2.5rem" },
                 }}
               >
                 Mapping the molecular architecture of the human sinoatrial node
