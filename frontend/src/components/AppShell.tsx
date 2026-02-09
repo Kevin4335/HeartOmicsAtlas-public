@@ -169,7 +169,7 @@ export default function AppShell({ children }: PropsWithChildren) {
               <Box
                 sx={{
                   justifySelf: { xs: "start", md: "start" },
-                  pl: { xs: 0, md: 8 }, // adjust this to move the block more right/left
+                  pl: { xs: 0, md: 4 }, // adjust this to move the block more right/left
                 }}
               >
                 <Stack spacing={1.1}>
