@@ -292,6 +292,7 @@ export default function AIChat() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          
         }}
       >
         {/* Welcome message when no messages */}
