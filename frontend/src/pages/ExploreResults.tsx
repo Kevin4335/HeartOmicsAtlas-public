@@ -108,7 +108,7 @@ const EXAMPLE_GENES: Record<string, string[]> = {
   mini_heart: ["SHOX2", "NPPA", "CDH5", "STMN2"],
 
   // optional fallback if nothing selected
-  default: ["TNNT2", "MYH7", "SCN5A"],
+  default: ["SHOX2", "MYL2", "STMN2"],
 };
 
 export default function ExploreResults() {

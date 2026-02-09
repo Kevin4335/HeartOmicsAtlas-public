@@ -19,3 +19,5 @@ REFERENCE/
 venv
 .venv
 out.txt
+.Rhistory
+.Rdata
