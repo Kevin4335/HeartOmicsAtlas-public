@@ -15,8 +15,8 @@ import { ButtonBase, Stack } from "@mui/material";
 import geneIcon from "../assets/chat_geneicon.png";
 import spatialIcon from "../assets/chat_spatialreasoningicon.png";
 import hypIcon from "../assets/chat_hypothesissupicon.png";
+import CheckIcon from "@mui/icons-material/Check";
 import CircularProgress from "@mui/material/CircularProgress";
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import Linkify from "linkify-react";
 
 // ----------------------
@@ -46,6 +46,18 @@ const AI_CHAT_URL = `${BASEURL}/chat`;
 
 const LS_OPENAI = "openai-history";
 const LS_DISPLAY = "display-history";
+
+const THINK_GRAY = "#9A9A9A";     // lighter than your current
+const THINK_GRAY_2 = "#B5B5B5";   // even lighter for subtext
+const SPINNER_COLOR = "#A8A8A8";
+
+const dashedSpinnerSx = {
+  color: SPINNER_COLOR,
+  "& .MuiCircularProgress-circle": {
+    strokeDasharray: "2 4",
+    strokeLinecap: "butt",
+  },
+};
 
 export default function AIChat() {
   const location = useLocation();
@@ -429,22 +441,23 @@ export default function AIChat() {
             >
               <FavoriteIcon sx={{ color: "#BE1B23", fontSize: 24, mb: 0.5 }} />
 
-              <Typography sx={{ fontSize: "0.9rem", color: "#777777", mb: 0.5 }}>
+              <Typography sx={{ fontSize: "0.9rem", color: THINK_GRAY, mb: 0.5 }}>
                 Thinking...
               </Typography>
+
 
               <Stack spacing={0.8} sx={{ pl: 0.2 }}>
                 {/* STEP 1 */}
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   {thinkingStep === 1 && (
-                    <CircularProgress size={18} thickness={5} sx={{ color: "#7A7A7A" }} />
+                    <CircularProgress size={18} thickness={4} sx={dashedSpinnerSx} />
                   )}
                   {thinkingStep >= 2 && (
-                    <CheckCircleRoundedIcon sx={{ fontSize: 18, color: "#7A7A7A" }} />
+                    <CheckIcon sx={{ fontSize: 18, color: THINK_GRAY }} />
                   )}
                   {thinkingStep === 0 && <Box sx={{ width: 18, height: 18 }} />}
 
-                  <Typography sx={{ fontSize: "0.85rem", color: "#777777" }}>
+                  <Typography sx={{ fontSize: "0.85rem", color: THINK_GRAY_2 }}>
                     Message received and being processed
                   </Typography>
                 </Box>
@@ -452,14 +465,14 @@ export default function AIChat() {
                 {/* STEP 2 */}
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   {thinkingStep === 2 && (
-                    <CircularProgress size={18} thickness={5} sx={{ color: "#7A7A7A" }} />
+                    <CircularProgress size={18} thickness={4} sx={dashedSpinnerSx} />
                   )}
                   {thinkingStep >= 3 && (
-                    <CheckCircleRoundedIcon sx={{ fontSize: 18, color: "#7A7A7A" }} />
+                    <CheckIcon sx={{ fontSize: 18, color: THINK_GRAY }} />
                   )}
                   {thinkingStep < 2 && <Box sx={{ width: 18, height: 18 }} />}
 
-                  <Typography sx={{ fontSize: "0.85rem", color: "#777777" }}>
+                  <Typography sx={{ fontSize: "0.85rem", color: THINK_GRAY_2 }}>
                     Processing
                   </Typography>
                 </Box>
@@ -467,12 +480,12 @@ export default function AIChat() {
                 {/* STEP 3 */}
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   {thinkingStep === 3 ? (
-                    <CircularProgress size={18} thickness={5} sx={{ color: "#7A7A7A" }} />
+                    <CircularProgress size={18} thickness={4} sx={dashedSpinnerSx} />
                   ) : (
                     <Box sx={{ width: 18, height: 18 }} />
                   )}
 
-                  <Typography sx={{ fontSize: "0.85rem", color: "#777777" }}>
+                  <Typography sx={{ fontSize: "0.85rem", color: THINK_GRAY_2 }}>
                     Formulating response
                   </Typography>
                 </Box>
