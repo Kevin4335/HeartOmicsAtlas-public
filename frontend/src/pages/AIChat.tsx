@@ -272,6 +272,20 @@ export default function AIChat() {
   }, [waiting]);
   
 
+  const [imgStatus, setImgStatus] = useState<Record<string, "loading" | "loaded" | "error">>({});
+
+  const getImgStatus = (src: string) => imgStatus[src] ?? "loading";
+
+  useEffect(() => {
+    for (const m of messages) {
+      if (m.type === "image" && !(m.content in imgStatus)) {
+        setImgStatus((prev) => ({ ...prev, [m.content]: "loading" }));
+      }
+    }
+    // intentionally depends on messages
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]);
+
   return (
     <Box
       sx={{
@@ -391,18 +405,70 @@ export default function AIChat() {
                   {/* Response content below the icon */}
                   <Box sx={{ maxWidth: "85%" }}>
                     {isImage ? (
-                      <img
-                        src={msg.content}
-                        alt="response"
-                        style={{
-                          maxWidth: "100%",
-                          maxHeight: 400,
-                          cursor: "pointer",
-                          display: "block",
-                          borderRadius: "8px",
-                        }}
-                        onClick={() => handleImageClick(msg.content)}
-                      />
+                      <Box sx={{ width: "100%", maxWidth: "100%" }}>
+                        {/* Overlay while image is loading */}
+                        {getImgStatus(msg.content) === "loading" && (
+                          <Box
+                            sx={{
+                              width: "100%",
+                              maxWidth: 420,          // controls how wide it can get
+                              aspectRatio: "1 / 1",   // makes it square
+                              minHeight: 220,         // safety for small screens
+                              borderRadius: "10px",
+                              backgroundColor: "#FAFAFA",
+                              border: "1px solid #F0F0F0",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: 1.2,
+                            }}
+                          >
+                            <CircularProgress size={22} thickness={4} sx={dashedSpinnerSx} />
+                            <Typography sx={{ fontSize: "0.9rem", color: THINK_GRAY }}>
+                              Generating
+                            </Typography>
+                          </Box>
+                        )}
+
+                        {/* Error state */}
+                        {getImgStatus(msg.content) === "error" && (
+                          <Box
+                            sx={{
+                              width: "100%",
+                              maxWidth: 420,          // controls how wide it can get
+                              aspectRatio: "1 / 1",   // makes it square
+                              minHeight: 220,         // safety for small screens
+                              borderRadius: "10px",
+                              backgroundColor: "#FAFAFA",
+                              border: "1px solid #F0F0F0",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: 1.2,
+                            }}
+                          >
+                            <Typography sx={{ fontSize: "0.85rem", color: THINK_GRAY }}>
+                              Failed to load image
+                            </Typography>
+                          </Box>
+                        )}
+
+                        {/* The actual image (hidden until loaded) */}
+                        <img
+                          src={msg.content}
+                          alt="response"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: 400,
+                            cursor: "pointer",
+                            display: getImgStatus(msg.content) === "loaded" ? "block" : "none",
+                            borderRadius: "8px",
+                          }}
+                          onClick={() => handleImageClick(msg.content)}
+                          onLoad={() => setImgStatus((prev) => ({ ...prev, [msg.content]: "loaded" }))}
+                          onError={() => setImgStatus((prev) => ({ ...prev, [msg.content]: "error" }))}
+                        />
+                      </Box>
                     ) : (
                       <Typography
                         sx={{
