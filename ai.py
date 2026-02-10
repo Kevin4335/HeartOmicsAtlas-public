@@ -18,10 +18,12 @@ import secrets
 import openai
 import requests
 from config import API_KEY
+from config import CHAT_KEY
 import os
 from typing import Tuple, Union, Literal, List
 import certifi
 import re
+from paper_rag.paper_search import paper_search, init_paper_search
 
 __all__ = ['process_ai_chat']
 
@@ -133,6 +135,8 @@ LOG_PATH = os.path.join(BASE_DIR, "openai_logs.txt")
 
 
 client = anthropic.Client(api_key=API_KEY)
+#client = OpenAI(api_key=CHAT_KEY)
+init_paper_search()
 
 rate_limit_records = []
 
@@ -223,6 +227,57 @@ def check_format(resp: str) -> None:
         #     assert (len(parameters) == 1), "glkb_ai_assistant accepts exactly 1 parameter."
         #     assert (type(parameters[0]) == str), "The parameter of glkb_ai_assistant should be a string."
         
+def _latest_user_text(history: list) -> str:
+    # history items look like {"role": "...", "content": "..."}
+    for msg in reversed(history):
+        if isinstance(msg, dict) and msg.get("role") == "user":
+            c = msg.get("content", "")
+            if isinstance(c, str) and c.strip():
+                return c.strip()
+    return ""
+
+def _excerpt_around_term(text: str, term: str, window: int = 350) -> str:
+    if not term:
+        return text[:900] + ("..." if len(text) > 900 else "")
+
+    m = re.search(re.escape(term), text, flags=re.IGNORECASE)
+    if not m:
+        return text[:900] + ("..." if len(text) > 900 else "")
+
+    start = max(0, m.start() - window)
+    end = min(len(text), m.end() + window)
+    excerpt = text[start:end].strip()
+
+    prefix = "... " if start > 0 else ""
+    suffix = " ..." if end < len(text) else ""
+    return prefix + excerpt + suffix
+
+
+def _format_paper_evidence(hits: list, query: str) -> str:
+    if not hits:
+        return "No relevant paper excerpts found."
+
+    # If query is short, treat it as an entity term (TEAD3, SHOX2, etc.)
+    term = ""
+    q = (query or "").strip()
+    if 1 <= len(q) <= 40 and " " not in q:
+        term = q
+    else:
+        # Heuristic for "Is X mentioned" style
+        m = re.search(r"\bis\s+([A-Za-z0-9_-]{2,40})\s+mentioned\b", q, flags=re.IGNORECASE)
+        if m:
+            term = m.group(1)
+
+    lines = []
+    for i, h in enumerate(hits, 1):
+        sec = h.get("section_path", "UNKNOWN")
+        cid = h.get("chunk_id", "UNKNOWN")
+        txt = (h.get("text", "") or "").strip()
+
+        txt = _excerpt_around_term(txt, term, window=350)
+
+        lines.append(f"[{i}] section={sec} chunk_id={cid}\n{txt}")
+    return "\n\n".join(lines)
 
 
 def get_gpt_resp(history: list) -> Tuple[bool, str, str]:
@@ -236,6 +291,40 @@ def get_gpt_resp(history: list) -> Tuple[bool, str, str]:
     while (trial > 0):
         trial -= 1
         try:
+            user_q = _latest_user_text(history)
+
+            # Adaptive threshold: try strict first, then loosen if we get too few hits
+            MAX_QUERY_CHARS = 1200
+            user_q = user_q[:MAX_QUERY_CHARS]
+
+            hits = paper_search(
+                user_q,
+                k=10,
+                min_score=0.60,
+                max_per_section=2,
+                context_window=1,
+                context_top_n=2,
+            )
+            if len(hits) < 3:
+                hits = paper_search(
+                    user_q,
+                    k=10,
+                    min_score=0.50,
+                    max_per_section=2,
+                    context_window=1,
+                    context_top_n=2,
+                )
+
+            evidence_block = _format_paper_evidence(hits, user_q)
+
+            system_prompt = PROMPT + "\n\n" + (
+                "## 6. Paper Evidence (authoritative)\n"
+                "You MUST use the excerpts below as the source of truth for questions about the paper.\n"
+                "If the answer is not supported by the excerpts, say you cannot find it in the paper.\n"
+                "Do not invent details.\n\n"
+                f"{evidence_block}\n"
+            )
+
             response = client.messages.create(
                 model = 'claude-sonnet-4-5-20250929',
                 temperature=0.2,
@@ -243,8 +332,20 @@ def get_gpt_resp(history: list) -> Tuple[bool, str, str]:
                 # top_p=1.0,
                 top_k=1000,
                 max_tokens=3072,
-                system=PROMPT
+                system=system_prompt
             )
+            
+            # response = client.chat.completions.create(
+            #     model="gpt-4o",
+            #     temperature=0.2,
+            #     max_tokens=3072,
+            #     messages=[
+            #         {"role": "system", "content": system_prompt},
+            #         *history
+            #     ],
+            # )
+
+            # result = response.choices[0].message.content
             result = response.content[0].text
             result = strip_code_fences(result)
             print(result)
@@ -523,7 +624,17 @@ def generate_messgae(resp: str) -> str:
 
 def process_ai_chat(request, path:str):
     print('AI chat')
-    user_input = request.rfile.read(int(request.headers['Content-Length'])).decode('utf-8')
+    MAX_BODY_BYTES = 256_000 # 256 KB, adjust as needed
+
+    cl = int(request.headers.get("Content-Length", "0") or "0")
+    if cl <= 0 or cl > MAX_BODY_BYTES:
+        request.send_response(413)  # Payload Too Large
+        request.send_header("Content-Length", 0)
+        request.send_header("Access-Control-Allow-Origin", "*")
+        request.end_headers()
+        return
+
+    user_input = request.rfile.read(cl).decode("utf-8", errors="replace")
     if(within_rate_limit() == False):
         request.send_response(429)
         request.send_header('Connection', 'keep-alive')
@@ -534,6 +645,21 @@ def process_ai_chat(request, path:str):
         request.wfile.flush()
         return
     history:list = json.loads(user_input)
+    MAX_TURNS = 30  # last 30 messages
+    if isinstance(history, list) and len(history) > MAX_TURNS:
+        history = history[-MAX_TURNS:]
+        
+    MAX_MSG_CHARS = 4000
+
+    def _trim_msg_content(m):
+        c = m.get("content", "")
+        if isinstance(c, str) and len(c) > MAX_MSG_CHARS:
+            m = dict(m)
+            m["content"] = c[:MAX_MSG_CHARS] + "…[truncated]"
+        return m
+
+    history = [_trim_msg_content(m) for m in history if isinstance(m, dict)]
+    
     error_msg = ''
     log_queue.put(json.dumps({'history': history}, ensure_ascii=False))
     success, error_msg, result = get_gpt_resp(history)
