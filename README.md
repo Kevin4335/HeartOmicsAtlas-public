@@ -107,4 +107,4 @@ For full behavior (gene plots, AI), run the R servers and `python server.py` as 
 
 ## Contact
 
-**Chen Lab**, Weill Cornell Medicine — [chenlab@weill.cornell.edu](mailto:chenlab@weill.cornell.edu)
+**Chen Lab**, Weill Cornell Medicine — [shc2034@med.cornell.edu](mailto:shc2034@med.cornell.edu)
