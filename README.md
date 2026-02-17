@@ -1,4 +1,4 @@
-# HeartOmicsAtlas
+<h1 align="center">HeartOmicsAtlas</h1>
 
 <p align="center">
   <strong>An AI-powered, open-access web portal for exploring the human sinoatrial node.</strong>
@@ -24,11 +24,9 @@ HeartOmicsAtlas is the public codebase for a **web portal** that lets users expl
 
 ## Data in the atlas
 
-| Modality | Contents |
-|----------|----------|
-| **scMultiomics** | snRNA-seq + snATAC-seq (human fetal SAN) |
-| **Spatial transcriptomics** | Single-cell–resolution spatial gene expression (fetal heart) |
-| **scRNA-seq** | ACM/VCM/SAN (fetal); SAN-PCO (SAN-paced atrial cardioids); Mini-heart (Sinoids + atrial + ventricular) |
+- **scMultiomics**
+- **Spatial transcriptomics**
+- **scRNA-seq** (ACM/VCM/SAN, SAN-PCO, Mini-heart)
 
 ---
 
