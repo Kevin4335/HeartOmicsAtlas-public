@@ -40,13 +40,15 @@ You can also ask questions to GLKB AI assistant. The Genomic Literature Knowledg
 
 The website has the following 5 functions, as following:
 
-1. def scRNA(gene: str, type: Literal["ACM_VCM_SAN", "SAN-PCO", "Mini-heart"]) -> bytes:
+1. def scRNA(gene: str, type: Literal["Sinoid (SAN)", "ACO (Atrial Cardioids)", "VCO (Ventricular Cardioids)", "SAN-PACO (SAN Paced Atrial Cardioids)", "Mini-heart"]) -> bytes:
     '''
-    Show the gene expression (UMAP, Violin, and Dotplot) in single cell RNA-seq. 
-    gene should be gene ID (or genetic loci), case insensitive. 
-    type can only be "ACM_VCM_SAN", "SAN-PCO", or "Mini-heart":
-    - "ACM_VCM_SAN": Atrial Cardiomyocytes, Ventricular Cardiomyocytes, and Sinoatrial Node cells
-    - "SAN-PCO": SAN Paced Cardiac Organoid cells
+    Show the gene expression (UMAP, Violin, Dotplot, and split UMAP) in single cell RNA-seq.
+    gene should be gene ID (or genetic loci), case insensitive.
+    type can only be one of:
+    - "Sinoid (SAN)": Sinoid (SAN) cells
+    - "ACO (Atrial Cardioids)": Atrial cardioids
+    - "VCO (Ventricular Cardioids)": Ventricular cardioids
+    - "SAN-PACO (SAN Paced Atrial Cardioids)": SAN-paced atrial cardioids
     - "Mini-heart": Mini-heart organoid cells
     '''
 
@@ -62,17 +64,16 @@ The website has the following 5 functions, as following:
     gene should be gene ID, case insensitive.
     '''
 
-4. static_images(name: Literal["ACM_VCM_SAN", "SAN-PCO", "Mini-heart", "multiomics", "spatial_transcriptomics"]) -> bytes:
+4. static_images(name: Literal["Sinoid (SAN)", "ACO (Atrial Cardioids)", "VCO (Ventricular Cardioids)", "SAN-PACO (SAN Paced Atrial Cardioids)", "Mini-heart", "multiomics", "spatial_transcriptomics"]) -> bytes:
     '''
-    To show some static default images to the user. Currently has following:
-    1. "ACM_VCM_SAN": Default plots for ACM_VCM_SAN scRNA data showing UMAP, Violin, and Dot plots
-    2. "SAN-PCO": Default plots for SAN-PCO scRNA data showing UMAP, Violin, and Dot plots
-    3. "Mini-heart": Default plots for Mini-heart scRNA data showing UMAP, Violin, and Dot plots
-    4. "multiomics": Default plots on the multiomics page, top left is an UMAP plot showing clustered cell types at the RNA level, color-coded by identity (endothelial, epithelial, lymphoid, etc.), top right is an UMAP plot showing clustered cell types at the ATAC (chromosome accessibility) level. The bottom is a dot plot displaying gene expression levels and percentages across different cell types.
-    5. "spatial_transcriptomics": Default plots on the Spatial Transcriptomics page, including a UMAP, spatial distribution plot, and dot plot.
+    To show some static default images to the user. name can be:
+    1. "Sinoid (SAN)", "ACO (Atrial Cardioids)", or "VCO (Ventricular Cardioids)": Default scRNA plots (UMAP, Violin, Dot, split)
+    2. "SAN-PACO (SAN Paced Atrial Cardioids)": Default SAN-PACO scRNA plots
+    3. "Mini-heart": Default Mini-heart scRNA plots
+    4. "multiomics": Default multiomics UMAP/ATAC/dot plots
+    5. "spatial_transcriptomics": Default spatial transcriptomics plots
 
-    Note: All images are combined into single PNG files.
-    name is case sensitive.
+    Note: All images are combined into single PNG files. name is case sensitive.
     '''
 
 6. glkb_ai_assistant(question: str) -> str:
@@ -573,16 +574,22 @@ def generate_messgae(resp: str) -> str:
             if (msg['name'] == 'scRNA'):
                 gene = msg['parameters'][0]
                 scRNA_type = msg['parameters'][1]
-                # Map scRNA types to ports
-                if scRNA_type == 'ACM_VCM_SAN':
-                    port = 9027
-                elif scRNA_type == 'SAN-PCO':
-                    port = 9028
+                # Map scRNA types to port and optional subtype (Sinoid/ACO/VCO use 9027 with ?subtype=)
+                base = 'http://128.84.41.80'
+                if scRNA_type in ('Sinoid (SAN)', 'ACO (Atrial Cardioids)', 'VCO (Ventricular Cardioids)'):
+                    subtype = 'sinoid' if scRNA_type == 'Sinoid (SAN)' else ('aco' if scRNA_type == 'ACO (Atrial Cardioids)' else 'vco')
+                    url = f'{base}:9027/genes/{gene}?subtype={subtype}'
+                elif scRNA_type == 'SAN-PACO (SAN Paced Atrial Cardioids)':
+                    url = f'{base}:9028/genes/{gene}'
                 elif scRNA_type == 'Mini-heart':
-                    port = 9029
+                    url = f'{base}:9029/genes/{gene}'
                 else:
-                    port = 9027  # Default fallback
-                messages.append({'type': 'image', 'content': f'http://128.84.41.80:{port}/genes/{gene}'})
+                    # Backward compat: ACM_VCM_SAN, SAN-PCO, or unknown -> sinoid / 9028
+                    if scRNA_type == 'SAN-PCO':
+                        url = f'{base}:9028/genes/{gene}'
+                    else:
+                        url = f'{base}:9027/genes/{gene}?subtype=sinoid'
+                messages.append({'type': 'image', 'content': url})
             elif (msg['name'] == 'multiomics'):
                 gene = msg['parameters'][0]
                 messages.append({'type': 'image', 'content': f'http://128.84.41.80:9026/genes/{gene}'})
@@ -591,15 +598,19 @@ def generate_messgae(resp: str) -> str:
                 messages.append({'type': 'image', 'content': f'http://128.84.41.80:9025/genes/{gene}'})
             elif (msg['name'] == 'static_images'):
                 image_name = msg['parameters'][0]
-                # Map static image names to actual file names
+                # Map static image names to actual file names (new names + backward compat)
                 image_map = {
-                    'ACM_VCM_SAN': 'ACM_VCM_SAN_default_plots.png',
-                    'SAN-PCO': 'SAN_PCO_default_plots.png',
+                    'Sinoid (SAN)': 'ACM_VCM_SAN_default_plots.png',
+                    'ACO (Atrial Cardioids)': 'ACM_VCM_SAN_default_plots.png',
+                    'VCO (Ventricular Cardioids)': 'ACM_VCM_SAN_default_plots.png',
+                    'SAN-PACO (SAN Paced Atrial Cardioids)': 'SAN_PCO_default_plots.png',
                     'Mini-heart': 'mini_heart_default_plots.png',
                     'multiomics': 'Multiomics_default_plots.png',
-                    'spatial_transcriptomics': 'Spatial_default_plots.png'
+                    'spatial_transcriptomics': 'Spatial_default_plots.png',
+                    'ACM_VCM_SAN': 'ACM_VCM_SAN_default_plots.png',
+                    'SAN-PCO': 'SAN_PCO_default_plots.png',
                 }
-                file_name = image_map.get(image_name, f'{image_name}_default_plots.png')
+                file_name = image_map.get(image_name, 'ACM_VCM_SAN_default_plots.png')
                 try:
                     with open(f'./imgs/{file_name}', 'rb') as f:
                         png_bytes = f.read()
