@@ -49,10 +49,10 @@ acmvcmOmics <- function(genes, png_path, subtype = "sinoid") {
             axis.title.x = element_text(size = 20),
             axis.title.y = element_text(size = 20))
 
-    # 3) Feature plot split by origin (full Combine) - ACO, VCO, Sinoid side by side
-    p3 <- FeaturePlot(Combine, features = genes, split.by = 'origin') +
-      labs(x = 'UMAP_1', y = "UMAP_2") +
-      theme(plot.title = element_text(size = 20),
+    # 3) Cell type UMAP for selected type only (subset) - no longer split by all three origins
+    p3 <- DimPlot(sub, label = TRUE, label.size = 5, repel = TRUE) +
+      labs(x = 'UMAP_1', y = "UMAP_2", title = paste0("Cell types (", origin_level, ")")) +
+      theme(plot.title = element_text(size = 20, hjust = 0.5),
             legend.text = element_text(size = 16),
             axis.text.x = element_text(size = 20),
             axis.text.y = element_text(size = 20),
@@ -66,7 +66,7 @@ acmvcmOmics <- function(genes, png_path, subtype = "sinoid") {
       RotatedAxis()
 
     combined <- p1 + p2 + p3 + p4 + plot_layout(ncol = 2)
-    ggsave(png_path, plot = combined, width = 15, height = 14, device = "png")
+    ggsave(png_path, plot = combined, width = 20, height = 14, device = "png")
     cat("Saved image to", png_path, "\n")
   }, error = function(e) {
     cat("Error generating plot:", conditionMessage(e), "\n")
