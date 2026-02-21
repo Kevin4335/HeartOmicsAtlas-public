@@ -30,7 +30,7 @@ type StepItem = {
 
 // 3 feature items (small row) with links
 const featureItems: LinkItem[] = [
-  { image: scrnaseq, text: "scRNA-seq", to: "/explore/results?type=acm_vcm_san" },
+  { image: scrnaseq, text: "scRNA-seq", to: "/explore/results?type=sinoid" },
   { image: spatialtrans, text: "Spatial Transcriptomics", to: "/explore/results?type=spatial" },
   { image: multiomics, text: "scMultiomics", to: "/explore/results?type=multiomics" },
 ];

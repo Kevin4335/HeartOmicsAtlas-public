@@ -70,16 +70,20 @@ import miniHeartDefault from "../assets/imgs/mini_heart_default_plots.png";
 const DEFAULT_IMAGES: Record<string, string> = {
   multiomics: multiomicsDefault,
   spatial: spatialDefault,
-  acm_vcm_san: acmVcmSanDefault,
+  sinoid: acmVcmSanDefault,
+  aco: acmVcmSanDefault,
+  vco: acmVcmSanDefault,
   san_pco: sanPcoDefault,
   mini_heart: miniHeartDefault,
 };
 
-// Backend URLs for each data type
-const BACKEND_URLS = {
+// Backend URLs for each data type (sinoid, aco, vco all use same server on 9027)
+const BACKEND_URLS: Record<string, string> = {
   multiomics: "http://128.84.41.80:9026",
   spatial: "http://128.84.41.80:9025",
-  acm_vcm_san: "http://128.84.41.80:9027",
+  sinoid: "http://128.84.41.80:9027",
+  aco: "http://128.84.41.80:9027",
+  vco: "http://128.84.41.80:9027",
   san_pco: "http://128.84.41.80:9028",
   mini_heart: "http://128.84.41.80:9029",
 };
@@ -93,8 +97,10 @@ const dataTypes = [
 
 // scRNA-seq subtypes (no logos)
 const scrnaSubtypes = [
-  { id: "acm_vcm_san", label: "ACM_VCM_SAN" },
-  { id: "san_pco", label: "SAN-PCO" },
+  { id: "sinoid", label: "Sinoid (SAN)" },
+  { id: "aco", label: "ACO (Atrial Cardioids)" },
+  { id: "vco", label: "VCO (Ventricular Cardioids)" },
+  { id: "san_pco", label: "SAN-PACO (SAN Paced Atrial Cardioids)" },
   { id: "mini_heart", label: "Mini-heart" },
 ];
 
@@ -103,11 +109,12 @@ const EXAMPLE_GENES: Record<string, string[]> = {
   multiomics: ["TBX5", "NPPA", "MYL2", "SYN3"],
 
   // scRNA-seq subtypes
-  acm_vcm_san: ["SHOX2", "NPPA", "CDH5", "STMN2"],
+  sinoid: ["SHOX2", "NPPA", "CDH5", "STMN2"],
+  aco: ["SHOX2", "NPPA", "CDH5", "STMN2"],
+  vco: ["SHOX2", "NPPA", "CDH5", "STMN2"],
   san_pco: ["SHOX2", "NPPA", "CDH5", "STMN2"],
   mini_heart: ["SHOX2", "NPPA", "CDH5", "STMN2"],
 
-  // optional fallback if nothing selected
   default: ["SHOX2", "MYL2", "STMN2"],
 };
 
@@ -116,13 +123,14 @@ export default function ExploreResults() {
   const navigate = useNavigate();
   const gene = searchParams.get("gene") || "";
   const typeParam = searchParams.get("type") || "";
-  
+  // Backward compat: old acm_vcm_san links map to sinoid
+  const normalizedType = typeParam === "acm_vcm_san" ? "sinoid" : typeParam;
+
   const [searchValue, setSearchValue] = useState(gene);
   const [scrnaExpanded, setScrnaExpanded] = useState(
-    // Auto-expand if a scRNA subtype is selected
-    scrnaSubtypes.some(s => s.id === typeParam)
+    scrnaSubtypes.some(s => s.id === normalizedType)
   );
-  const [selectedType, setSelectedType] = useState<string | null>(typeParam || null);
+  const [selectedType, setSelectedType] = useState<string | null>(normalizedType || null);
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
   // Cache for loaded images - tracks which type+gene combos have been successfully loaded
@@ -131,11 +139,11 @@ export default function ExploreResults() {
   // Sync state with URL params when navigating back to this page
   useEffect(() => {
     setSearchValue(gene);
-    setSelectedType(typeParam || null);
-    if (scrnaSubtypes.some(s => s.id === typeParam)) {
+    setSelectedType(normalizedType || null);
+    if (scrnaSubtypes.some(s => s.id === normalizedType)) {
       setScrnaExpanded(true);
     }
-  }, [gene, typeParam]);
+  }, [gene, typeParam, normalizedType]);
 
   // Compute the image URL to display
   const getImageUrl = () => {
@@ -147,9 +155,14 @@ export default function ExploreResults() {
     }
     
     // If gene is present, try to load from backend
-    const baseUrl = BACKEND_URLS[selectedType as keyof typeof BACKEND_URLS];
+    const baseUrl = BACKEND_URLS[selectedType];
     if (!baseUrl) return null;
-    return `${baseUrl}/genes/${encodeURIComponent(gene)}`;
+    const encodedGene = encodeURIComponent(gene);
+    // sinoid, aco, vco use same server; pass subtype so backend can generate the right plot
+    if (selectedType === "sinoid" || selectedType === "aco" || selectedType === "vco") {
+      return `${baseUrl}/genes/${encodedGene}?subtype=${selectedType}`;
+    }
+    return `${baseUrl}/genes/${encodedGene}`;
   };
 
   const imageUrl = getImageUrl();

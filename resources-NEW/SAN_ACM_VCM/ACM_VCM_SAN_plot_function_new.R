@@ -17,43 +17,59 @@ Combine <- RenameIdents(Combine, 'FB_1' = 'Fibroblast_1','FB_2' = 'Fibroblast_2'
 Combine$celltype <- Idents(Combine)
 levels(Combine) <- c("ACM","Endothelial","Epicardial","Epithelial","Fibroblast_1","Fibroblast_2",
                      "Neuronal","Neural_Crest","Proliferating","SAN","VCM")
+# Origin for Sinoid / ACO / VCO (from revised script)
+Combine$origin <- ifelse(Combine$orig.ident == 'ACM', 'ACO',
+                         ifelse(Combine$orig.ident == 'VCM', 'VCO', 'Sinoid'))
+Combine$origin <- factor(Combine$origin, levels = c('ACO', 'VCO', 'Sinoid'))
 
-# Plot generator for ACM_VCM_SAN data
-# Violin plot - first plot when search for specific gene
-# UMAP - second plot when search for specific gene
-# Dotplot - third plot when search for specific gene
-acmvcmOmics <- function(genes, png_path) {
+# Plot generator: subtype "sinoid", "aco", or "vco" filters to that origin; 4-panel layout from revised script
+acmvcmOmics <- function(genes, png_path, subtype = "sinoid") {
   tryCatch({
-    # Violin plot showing the expression of indicated gene
-    p4 <- VlnPlot(Combine,features = genes,pt.size = 0) + labs(x = '') +
-      theme(plot.title = element_text(size = 20,hjust = 0.5),
+    # Map frontend subtype to origin level
+    origin_level <- switch(subtype, "aco" = "ACO", "vco" = "VCO", "Sinoid")
+    if (is.null(origin_level)) origin_level <- "Sinoid"
+    sub <- subset(Combine, subset = origin == origin_level)
+
+    # 1) Violin (subset)
+    p1 <- VlnPlot(sub, features = genes, pt.size = 0) + labs(x = '') +
+      theme(plot.title = element_text(size = 20, hjust = 0.5),
             legend.text = element_text(size = 16),
             axis.text.x = element_text(size = 20),
             axis.text.y = element_text(size = 20),
             axis.title.x = element_text(size = 20),
             axis.title.y = element_text(size = 20))
 
-    # UMAP to demonstrate the expression of selected gene
-    p3 <- FeaturePlot(Combine,features = genes) +
-      labs(x = 'UMAP_1',y = "UMAP_2") +
-      theme(plot.title = element_text(size = 20,hjust = 0.5),
+    # 2) Feature plot (subset)
+    p2 <- FeaturePlot(sub, features = genes) +
+      labs(x = 'UMAP_1', y = "UMAP_2") +
+      theme(plot.title = element_text(size = 20, hjust = 0.5),
             legend.text = element_text(size = 16),
             axis.text.x = element_text(size = 20),
             axis.text.y = element_text(size = 20),
             axis.title.x = element_text(size = 20),
             axis.title.y = element_text(size = 20))
 
-    # Dotplot to demonstrate the expression of selected gene
-    p2 <- DotPlot(Combine,features = genes) + labs(x = '',y = '')+
+    # 3) Feature plot split by origin (full Combine) - ACO, VCO, Sinoid side by side
+    p3 <- FeaturePlot(Combine, features = genes, split.by = 'origin') +
+      labs(x = 'UMAP_1', y = "UMAP_2") +
+      theme(plot.title = element_text(size = 20),
+            legend.text = element_text(size = 16),
+            axis.text.x = element_text(size = 20),
+            axis.text.y = element_text(size = 20),
+            axis.title.x = element_text(size = 20),
+            axis.title.y = element_text(size = 20))
+
+    # 4) Dotplot (subset)
+    p4 <- DotPlot(sub, features = genes) + labs(x = '', y = '') +
       theme(axis.text.x = element_text(size = 16),
             axis.text.y = element_text(size = 16)) +
       RotatedAxis()
 
-    combined <- p4 + p3 + p2 + plot_layout(ncol = 2)
-    ggsave(png_path, plot = combined, width = 15, height = 10, device = "png")
+    combined <- p1 + p2 + p3 + p4 + plot_layout(ncol = 2)
+    ggsave(png_path, plot = combined, width = 15, height = 14, device = "png")
     cat("Saved image to", png_path, "\n")
   }, error = function(e) {
-    cat("Error generating ACM_VCM_SAN plot:", e$message, "\n")
+    cat("Error generating plot:", conditionMessage(e), "\n")
   })
 }
 
@@ -86,6 +102,24 @@ app <- list(
 
     if (grepl("^/genes/", url)) {
       gene_name <- sub("^/genes/", "", url)
+      # Remove any query string from gene_name (e.g. "SHOX2" from "SHOX2?subtype=aco")
+      gene_name <- strsplit(gene_name, "?", fixed = TRUE)[[1]][1]
+
+      # Parse subtype from query string (sinoid, aco, vco)
+      subtype <- "sinoid"
+      qs <- req$QUERY_STRING
+      if (!is.null(qs) && nchar(qs) > 0) {
+        qs <- sub("^[?]", "", qs)  # strip leading ? if present
+        pairs <- strsplit(qs, "&", fixed = TRUE)[[1]]
+        for (p in pairs) {
+          kv <- strsplit(p, "=", fixed = TRUE)[[1]]
+          if (length(kv) >= 2 && trimws(kv[1]) == "subtype") {
+            subtype <- trimws(utils::URLdecode(kv[2]))
+            if (!subtype %in% c("sinoid", "aco", "vco")) subtype <- "sinoid"
+            break
+          }
+        }
+      }
 
       if (!(gene_name %in% rownames(Combine))) {
         return(list(
@@ -99,7 +133,7 @@ app <- list(
       }
 
       png_file <- tempfile(fileext = ".png")
-      acmvcmOmics(gene_name, png_file)
+      acmvcmOmics(gene_name, png_file, subtype)
       png_data <- readBin(png_file, what = "raw", n = file.info(png_file)$size)
 
       return(list(
