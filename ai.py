@@ -27,6 +27,10 @@ from paper_rag.paper_search import paper_search, init_paper_search
 
 __all__ = ['process_ai_chat']
 
+# Configurable URLs for local testing (set env vars to point to your machine)
+PLOT_BACKEND_BASE = "http://128.84.41.80"
+GLKB_LLM_AGENT_URL = "https://glkb.dcmb.med.umich.edu/api/frontend/llm_agent"
+
 
 PROMPT = """## 1. Introduction and Task
 
@@ -381,7 +385,7 @@ def glkb_chat(question: str) -> Tuple[bool, str]:
     - Adds caps to avoid runaway memory
     - Better error messages (HTTP body snippet, content-type, etc.)
     """
-    URL = "https://glkb.dcmb.med.umich.edu/api/frontend/llm_agent"
+    URL = GLKB_LLM_AGENT_URL
     PREFIX = "[AGENT OUTPUT] FinalAnswerAgent | Output:"
 
     # Safety knobs
@@ -575,7 +579,7 @@ def generate_messgae(resp: str) -> str:
                 gene = msg['parameters'][0]
                 scRNA_type = msg['parameters'][1]
                 # Map scRNA types to port and optional subtype (Sinoid/ACO/VCO use 9027 with ?subtype=)
-                base = 'http://128.84.41.80'
+                base = PLOT_BACKEND_BASE
                 if scRNA_type in ('Sinoid (SAN)', 'ACO (Atrial Cardioids)', 'VCO (Ventricular Cardioids)'):
                     subtype = 'sinoid' if scRNA_type == 'Sinoid (SAN)' else ('aco' if scRNA_type == 'ACO (Atrial Cardioids)' else 'vco')
                     url = f'{base}:9027/genes/{gene}?subtype={subtype}'
@@ -592,10 +596,10 @@ def generate_messgae(resp: str) -> str:
                 messages.append({'type': 'image', 'content': url})
             elif (msg['name'] == 'multiomics'):
                 gene = msg['parameters'][0]
-                messages.append({'type': 'image', 'content': f'http://128.84.41.80:9026/genes/{gene}'})
+                messages.append({'type': 'image', 'content': f'{PLOT_BACKEND_BASE}:9026/genes/{gene}'})
             elif (msg['name'] == 'spatial_transcriptomics'):
                 gene = msg['parameters'][0]
-                messages.append({'type': 'image', 'content': f'http://128.84.41.80:9025/genes/{gene}'})
+                messages.append({'type': 'image', 'content': f'{PLOT_BACKEND_BASE}:9025/genes/{gene}'})
             elif (msg['name'] == 'static_images'):
                 image_name = msg['parameters'][0]
                 # Map static image names to actual file names (new names + backward compat)

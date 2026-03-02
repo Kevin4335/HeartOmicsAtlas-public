@@ -77,15 +77,16 @@ const DEFAULT_IMAGES: Record<string, string> = {
   mini_heart: miniHeartDefault,
 };
 
-// Backend URLs for each data type (sinoid, aco, vco all use same server on 9027)
+// Backend URLs for plot servers. For local testing set VITE_PLOT_BACKEND_BASE (e.g. http://localhost) in .env
+const PLOT_BASE = "http://128.84.41.80";
 const BACKEND_URLS: Record<string, string> = {
-  multiomics: "http://128.84.41.80:9026",
-  spatial: "http://128.84.41.80:9025",
-  sinoid: "http://128.84.41.80:9027",
-  aco: "http://128.84.41.80:9027",
-  vco: "http://128.84.41.80:9027",
-  san_pco: "http://128.84.41.80:9028",
-  mini_heart: "http://128.84.41.80:9029",
+  multiomics: `${PLOT_BASE}:9026`,
+  spatial: `${PLOT_BASE}:9025`,
+  sinoid: `${PLOT_BASE}:9027`,
+  aco: `${PLOT_BASE}:9027`,
+  vco: `${PLOT_BASE}:9027`,
+  san_pco: `${PLOT_BASE}:9028`,
+  mini_heart: `${PLOT_BASE}:9029`,
 };
 
 // Main data types
