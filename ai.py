@@ -28,8 +28,8 @@ from paper_rag.paper_search import paper_search, init_paper_search
 __all__ = ['process_ai_chat']
 
 # Configurable URLs for local testing (set env vars to point to your machine)
-PLOT_BACKEND_BASE = "http://128.84.41.80"
-GLKB_LLM_AGENT_URL = "https://glkb.dcmb.med.umich.edu/api/frontend/llm_agent"
+PLOT_BACKEND_BASE = os.environ.get("PLOT_BACKEND_BASE", "http://128.84.41.80")
+GLKB_LLM_AGENT_URL = os.environ.get("GLKB_LLM_AGENT_URL", "https://glkb.dcmb.med.umich.edu/api/frontend/llm_agent")
 
 
 PROMPT = """## 1. Introduction and Task

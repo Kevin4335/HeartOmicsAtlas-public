@@ -58,9 +58,11 @@ class PaperSearchEngine:
         self.min_score = float(min_score)
         self.exclude_sections = exclude_sections or DEFAULT_EXCLUDE_SECTIONS
 
-        self.rag_dir = rag_dir or os.environ.get(
-            "RAG_DIR", "/home/ubuntu/HeartOmics/paper_rag/data/fetal_heart_v1"
+        _default_rag_dir = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "data", "fetal_heart_v1",
         )
+        self.rag_dir = rag_dir or os.environ.get("RAG_DIR", _default_rag_dir)
         self.index_path = index_path or os.environ.get(
             "RAG_INDEX", os.path.join(self.rag_dir, "index.faiss")
         )
