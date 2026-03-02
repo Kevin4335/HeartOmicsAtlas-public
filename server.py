@@ -15,7 +15,6 @@ from datetime import datetime, timezone
 from ai import process_ai_chat
 from mySecrets import hexToStr
 from secrets import token_hex
-from my_email import send_email
 
 
 IS_SERVER = False
