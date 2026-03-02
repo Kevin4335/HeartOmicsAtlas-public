@@ -36,8 +36,6 @@ env/
 ENV/
 *.pem
 *.key
-*.env
-.env*
 paper_rag/data/*/*.npy
 paper_rag/data/*/*.pkl
 

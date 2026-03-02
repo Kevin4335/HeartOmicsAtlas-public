@@ -77,8 +77,7 @@ const DEFAULT_IMAGES: Record<string, string> = {
   mini_heart: miniHeartDefault,
 };
 
-// Backend URLs for plot servers. For local testing set VITE_PLOT_BACKEND_BASE (e.g. http://localhost) in .env
-const PLOT_BASE = "http://128.84.41.80";
+const PLOT_BASE = "http://128.84.41.80"; // do not run locally.
 const BACKEND_URLS: Record<string, string> = {
   multiomics: `${PLOT_BASE}:9026`,
   spatial: `${PLOT_BASE}:9025`,
