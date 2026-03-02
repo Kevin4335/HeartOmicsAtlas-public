@@ -6,3 +6,4 @@ PyMuPDF
 openai
 anthropic
 requests
+python-dotenv

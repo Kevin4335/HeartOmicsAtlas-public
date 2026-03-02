@@ -268,11 +268,11 @@ class Request(BaseHTTPRequestHandler):
         return
     
     def do_OPTIONS(self):
-        print('http OPTIONS')
         self.send_response(200)
         self.send_header('Connection', 'keep-alive')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.send_header('Content-Length', 0)
         self.end_headers()
         self.wfile.write(b'')

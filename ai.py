@@ -20,14 +20,23 @@ import requests
 from config import API_KEY
 from config import CHAT_KEY
 import os
+from pathlib import Path
 from typing import Tuple, Union, Literal, List
 import certifi
 import re
 from paper_rag.paper_search import paper_search, init_paper_search
 
+# Load project root .env so PLOT_BACKEND_BASE, GLKB_LLM_AGENT_URL, etc. are available
+try:
+    import dotenv
+    _root = Path(__file__).resolve().parent
+    dotenv.load_dotenv(_root / ".env")
+except ImportError:
+    pass
+
 __all__ = ['process_ai_chat']
 
-# Configurable URLs for local testing (set env vars to point to your machine)
+# Configurable URLs (from root .env or environment)
 PLOT_BACKEND_BASE = os.environ.get("PLOT_BACKEND_BASE", "http://128.84.41.80")
 GLKB_LLM_AGENT_URL = os.environ.get("GLKB_LLM_AGENT_URL", "https://glkb.dcmb.med.umich.edu/api/frontend/llm_agent")
 

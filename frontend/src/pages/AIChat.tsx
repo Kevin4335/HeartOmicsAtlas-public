@@ -42,8 +42,8 @@ type BackendResponse = {
 // ----------------------
 const TEST_MODE = false;
 
-// For local testing: set VITE_API_BASE (e.g. http://localhost:9037) in .env; else dev uses remote server.
-const BASEURL = "http://128.84.40.121" ;
+// API base from root .env (VITE_API_BASE). Empty = same origin; set e.g. http://localhost:8000 for local server.
+const BASEURL = import.meta.env.VITE_API_BASE ?? "";
 const AI_CHAT_URL = `${BASEURL}/chat`;
 
 const LS_OPENAI = "openai-history";
