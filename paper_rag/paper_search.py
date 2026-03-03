@@ -16,6 +16,11 @@ try:
 except Exception:
     faiss = None
 
+try:
+    from rank_bm25 import BM25Okapi
+except ImportError:
+    BM25Okapi = None
+
 from paper_rag.embedder_openai import OpenAIEmbedder
 
 
@@ -50,7 +55,7 @@ class PaperSearchEngine:
         meta_path: Optional[str] = None,
         embed_model: str = "text-embedding-3-small",
         min_score: float = 0.0,
-        exclude_sections: Optional[set[str]] = None,
+        exclude_sections: Optional[set] = None,
     ):
         if faiss is None:
             raise RuntimeError("faiss not installed. pip install faiss-cpu")
@@ -74,6 +79,7 @@ class PaperSearchEngine:
 
         self._index = None
         self._chunks: List[PaperChunk] = []
+        self._bm25 = None
 
         self._load()
 
@@ -99,13 +105,22 @@ class PaperSearchEngine:
                     )
                 )
 
+        # Build BM25 index in-memory from loaded chunks (fast, no disk storage)
+        if BM25Okapi is not None and self._chunks:
+            tokenized = [ch.text.lower().split() for ch in self._chunks]
+            self._bm25 = BM25Okapi(tokenized)
+
+    # ------------------------------------------------------------------
+    # Dense (FAISS) search
+    # ------------------------------------------------------------------
+
     def _raw_search(
         self,
         query: str,
         k: int,
         *,
         min_score: Optional[float] = None,
-        exclude_sections: Optional[set[str]] = None,
+        exclude_sections: Optional[set] = None,
     ) -> List[Dict[str, Any]]:
         min_score_val = self.min_score if min_score is None else float(min_score)
         exclude_val = self.exclude_sections if exclude_sections is None else exclude_sections
@@ -142,6 +157,81 @@ class PaperSearchEngine:
             )
 
         return hits
+
+    # ------------------------------------------------------------------
+    # BM25 keyword search
+    # ------------------------------------------------------------------
+
+    def _bm25_search(
+        self,
+        query: str,
+        top_n: int = 50,
+        exclude_sections: Optional[set] = None,
+    ) -> List[Dict[str, Any]]:
+        """Return top_n chunks ranked by BM25 keyword score."""
+        if self._bm25 is None:
+            return []
+        if not query.strip():
+            return []
+
+        exclude_val = self.exclude_sections if exclude_sections is None else exclude_sections
+        tokens = query.lower().split()
+        scores = self._bm25.get_scores(tokens)  # numpy array, one per chunk
+
+        ranked = np.argsort(scores)[::-1][:top_n]
+        hits = []
+        for row in ranked:
+            if scores[row] <= 0:
+                break
+            ch = self._chunks[row]
+            if ch.section_path in exclude_val:
+                continue
+            hits.append(
+                {
+                    "doc_id": ch.doc_id,
+                    "chunk_id": ch.chunk_id,
+                    "section_path": ch.section_path,
+                    "score": float(scores[row]),
+                    "text": ch.text,
+                    "_row": int(row),
+                }
+            )
+        return hits
+
+    # ------------------------------------------------------------------
+    # Reciprocal Rank Fusion
+    # ------------------------------------------------------------------
+
+    def _reciprocal_rank_fusion(
+        self,
+        dense_hits: List[Dict[str, Any]],
+        bm25_hits: List[Dict[str, Any]],
+        k: int = 60,
+    ) -> List[Dict[str, Any]]:
+        """Merge two ranked lists using RRF: score = sum of 1/(rank + k)."""
+        rrf_scores: Dict[int, float] = {}
+        all_hits: Dict[int, Dict] = {}
+
+        for rank, h in enumerate(dense_hits):
+            row = h["_row"]
+            rrf_scores[row] = rrf_scores.get(row, 0.0) + 1.0 / (rank + k)
+            all_hits[row] = h
+
+        for rank, h in enumerate(bm25_hits):
+            row = h["_row"]
+            rrf_scores[row] = rrf_scores.get(row, 0.0) + 1.0 / (rank + k)
+            if row not in all_hits:
+                all_hits[row] = h
+
+        merged = sorted(rrf_scores.items(), key=lambda x: x[1], reverse=True)
+        return [
+            {**all_hits[row], "score": score, "_row": row}
+            for row, score in merged
+        ]
+
+    # ------------------------------------------------------------------
+    # Post-processing helpers (unchanged)
+    # ------------------------------------------------------------------
 
     def _apply_section_cap(self, hits, k, max_per_section):
         out = []
@@ -207,6 +297,10 @@ class PaperSearchEngine:
 
         return out
 
+    # ------------------------------------------------------------------
+    # Public search: hybrid dense + BM25 with RRF
+    # ------------------------------------------------------------------
+
     def search(
         self,
         query: str,
@@ -216,14 +310,23 @@ class PaperSearchEngine:
         context_top_n: int = 0,
         *,
         min_score: Optional[float] = None,
-        exclude_sections: Optional[set[str]] = None,
+        exclude_sections: Optional[set] = None,
     ):
-        raw = self._raw_search(
+        # Dense retrieval — use min_score=0.0 so RRF sees the full ranked list
+        dense_hits = self._raw_search(
             query,
             max(50, k * 10),
-            min_score=min_score,
+            min_score=0.0,
             exclude_sections=exclude_sections,
         )
+
+        # BM25 keyword retrieval
+        bm25_hits = self._bm25_search(query, top_n=50, exclude_sections=exclude_sections)
+
+        # Merge via Reciprocal Rank Fusion
+        raw = self._reciprocal_rank_fusion(dense_hits, bm25_hits)
+
+        # Post-processing: section cap → context window → trim
         primary = self._apply_section_cap(raw, k, max_per_section)
         expanded = self._add_context_window(primary, context_window, context_top_n)
 
@@ -252,12 +355,12 @@ def init_paper_search(
     embed_model: str = "text-embedding-3-small",
     *,
     min_score: float = 0.0,
-    exclude_sections: Optional[set[str]] = None,
+    exclude_sections: Optional[set] = None,
 ) -> None:
     """
     Eagerly initialize the singleton search engine.
-    This ONLY loads index.faiss + metadata.jsonl into memory.
-    It does NOT rebuild embeddings or FAISS.
+    Loads index.faiss + metadata.jsonl into memory and builds BM25 index.
+    Does NOT rebuild embeddings or FAISS.
     """
     global _ENGINE
     with _LOCK:

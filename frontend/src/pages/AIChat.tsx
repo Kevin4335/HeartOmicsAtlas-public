@@ -274,16 +274,20 @@ export default function AIChat() {
   }, [waiting]);
   
 
-  const [imgStatus, setImgStatus] = useState<Record<string, "loading" | "loaded" | "error">>({});
+  const [imgStatus, setImgStatus] = useState<Record<number, "loading" | "loaded" | "error">>({});
 
-  const getImgStatus = (src: string) => imgStatus[src] ?? "loading";
+  const getImgStatus = (idx: number) => imgStatus[idx] ?? "loading";
 
   useEffect(() => {
-    for (const m of messages) {
-      if (m.type === "image" && !(m.content in imgStatus)) {
-        setImgStatus((prev) => ({ ...prev, [m.content]: "loading" }));
-      }
-    }
+    setImgStatus((prev) => {
+      const next = { ...prev };
+      messages.forEach((m, idx) => {
+        if (m.type === "image" && !(idx in next)) {
+          next[idx] = "loading";
+        }
+      });
+      return next;
+    });
     // intentionally depends on messages
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
@@ -409,13 +413,13 @@ export default function AIChat() {
                     {isImage ? (
                       <Box sx={{ width: "100%", maxWidth: "100%" }}>
                         {/* Overlay while image is loading */}
-                        {getImgStatus(msg.content) === "loading" && (
+                        {getImgStatus(idx) === "loading" && (
                           <Box
                             sx={{
                               width: "100%",
-                              maxWidth: 420,          // controls how wide it can get
-                              aspectRatio: "1 / 1",   // makes it square
-                              minHeight: 220,         // safety for small screens
+                              maxWidth: 420,
+                              aspectRatio: "1 / 1",
+                              minHeight: 220,
                               borderRadius: "10px",
                               backgroundColor: "#FAFAFA",
                               border: "1px solid #F0F0F0",
@@ -433,13 +437,13 @@ export default function AIChat() {
                         )}
 
                         {/* Error state */}
-                        {getImgStatus(msg.content) === "error" && (
+                        {getImgStatus(idx) === "error" && (
                           <Box
                             sx={{
                               width: "100%",
-                              maxWidth: 420,          // controls how wide it can get
-                              aspectRatio: "1 / 1",   // makes it square
-                              minHeight: 220,         // safety for small screens
+                              maxWidth: 420,
+                              aspectRatio: "1 / 1",
+                              minHeight: 220,
                               borderRadius: "10px",
                               backgroundColor: "#FAFAFA",
                               border: "1px solid #F0F0F0",
@@ -463,12 +467,12 @@ export default function AIChat() {
                             maxWidth: "100%",
                             maxHeight: 400,
                             cursor: "pointer",
-                            display: getImgStatus(msg.content) === "loaded" ? "block" : "none",
+                            display: getImgStatus(idx) === "loaded" ? "block" : "none",
                             borderRadius: "8px",
                           }}
                           onClick={() => handleImageClick(msg.content)}
-                          onLoad={() => setImgStatus((prev) => ({ ...prev, [msg.content]: "loaded" }))}
-                          onError={() => setImgStatus((prev) => ({ ...prev, [msg.content]: "error" }))}
+                          onLoad={() => setImgStatus((prev) => ({ ...prev, [idx]: "loaded" }))}
+                          onError={() => setImgStatus((prev) => ({ ...prev, [idx]: "error" }))}
                         />
                       </Box>
                     ) : (
