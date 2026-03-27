@@ -112,8 +112,8 @@ class Request(BaseHTTPRequestHandler):
             return self.process_robots_txt()
         if (path == '/sitemap.xml'):
             return self.process_sitemap_xml()
-        # React static: /assets/*, /vite.svg, /favicon.ico, /heart_logo_1.png
-        if path.startswith('/assets/') or path in ('/vite.svg', '/favicon.ico', '/heart_logo_1.png'):
+        # React static: /assets/*, /vite.svg, /favicon.ico, /heart_logo_1.svg, /heart_logo_1.png
+        if path.startswith('/assets/') or path in ('/vite.svg', '/favicon.ico', '/heart_logo_1.svg', '/heart_logo_1.png'):
             return self.serve_react_static(path)
         # SPA fallback for client-side routes: /chat, /spatial, /multiomics, /scrna, etc.
         return self.serve_react_index()
