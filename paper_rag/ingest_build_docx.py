@@ -2,7 +2,7 @@ import os
 import hashlib
 from paper_rag.docx_extract import extract_docx_with_headings, to_marked_text
 from paper_rag.chunking import chunk_with_headings
-from paper_rag.embedder_openai import OpenAIEmbedder
+from paper_rag.embedder_local import LocalEmbedder
 from paper_rag.faiss_store import save_jsonl, build_faiss_index, save_faiss
 
 def file_sha256(path: str) -> str:
@@ -56,7 +56,7 @@ def main():
         )
         texts.append(f"[{c.section_path}]\n{c.text}")
 
-    embedder = OpenAIEmbedder()
+    embedder = LocalEmbedder()
     vecs = embedder.embed_texts(texts)
 
     index = build_faiss_index(vecs)

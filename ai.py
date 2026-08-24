@@ -18,7 +18,6 @@ import secrets
 import openai
 import requests
 from config import API_KEY
-from config import CHAT_KEY
 import os
 from pathlib import Path
 from typing import Tuple, Union, Literal, List, Dict, Any
@@ -524,15 +523,13 @@ def _fetch_png_bytes(url: str) -> Union[bytes, None]:
 def _image_tool_result(description: str, png_bytes: Union[bytes, None], url: str) -> Tuple[list, dict]:
     """Build a multimodal tool_result content list and a frontend display_msg.
 
-    Claude receives the actual image as a base64 block (so it can interpret the figure).
-    The frontend always gets the original URL as the image src — this keeps the JSON
-    response small and avoids the React imgStatus key-collision bug that occurs when
-    multi-megabyte base64 strings are used as state object keys.
+    Claude receives the image as a base64 block so it can interpret the figure.
+    The frontend also gets a base64 data URI — the R plot servers (ports 9025–9029)
+    are not reachable from the browser (firewalled / mixed-content), so we inline
+    the PNG bytes the Python server already fetched.
 
     Returns:
         (tool_result_content, display_msg)
-        - tool_result_content: list of content blocks for the Anthropic tool_result
-        - display_msg: dict for the frontend {"type": "image", "content": url}
     """
     if png_bytes:
         b64 = binToBase64(png_bytes)
@@ -550,11 +547,10 @@ def _image_tool_result(description: str, png_bytes: Union[bytes, None], url: str
                 "text": description,
             },
         ]
+        display_msg = {"type": "image", "content": "data:image/png;base64," + b64}
     else:
         tool_result_content = [{"type": "text", "text": f"{description} (image could not be fetched)"}]
-
-    # Always use the original URL for the frontend — keeps JSON small and imgStatus keys short
-    display_msg = {"type": "image", "content": url}
+        display_msg = {"type": "text", "content": "Image could not be generated."}
 
     return tool_result_content, display_msg
 
@@ -746,7 +742,7 @@ def get_gpt_resp(history: list) -> Tuple[bool, str, list]:
         planner_system = PLANNER_SYSTEM_PROMPT + "\n\n" + paper_section
 
         planner_resp = client.messages.create(
-            model="claude-sonnet-4-5-20250929",
+            model="claude-sonnet-4-6",
             temperature=0,
             messages=anthropic_msgs,
             max_tokens=1024,

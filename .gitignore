@@ -40,3 +40,4 @@ paper_rag/data/*/*.npy
 paper_rag/data/*/*.pkl
 
 test.py
+CLAUDE.md

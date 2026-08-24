@@ -49,6 +49,24 @@ const AI_CHAT_URL = `${BASEURL}/chat`;
 const LS_OPENAI = "openai-history";
 const LS_DISPLAY = "display-history";
 
+// Image messages carry full base64 data URIs (~1MB each). LocalStorage quota
+// is 5-10MB, so persisting them blows the quota after a few plots. Drop the
+// payload on write — images don't survive reloads, but text history does.
+const sanitizeForStorage = (msgs: DisplayMessage[]): DisplayMessage[] =>
+  msgs.map((m) =>
+    m.type === "image"
+      ? { type: "text", content: "[Generated figure — not preserved across reloads]" }
+      : m
+  );
+
+const safeSetItem = (key: string, value: string) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch (e) {
+    console.warn(`localStorage.setItem(${key}) failed:`, e);
+  }
+};
+
 const THINK_GRAY = "#9A9A9A";     // lighter than your current
 const THINK_GRAY_2 = "#B5B5B5";   // even lighter for subtext
 const SPINNER_COLOR = "#A8A8A8";
@@ -106,8 +124,8 @@ export default function AIChat() {
 
   const clearHistory = () => {
     if (waiting) return;
-    localStorage.setItem(LS_OPENAI, JSON.stringify([]));
-    localStorage.setItem(LS_DISPLAY, JSON.stringify([]));
+    safeSetItem(LS_OPENAI, JSON.stringify([]));
+    safeSetItem(LS_DISPLAY, JSON.stringify([]));
     setMessages([]);
   };
 
@@ -145,8 +163,8 @@ export default function AIChat() {
 
     const nextDisplay: DisplayMessage[] = [...messages, userMsg];
     setMessages(nextDisplay);
-    localStorage.setItem(LS_OPENAI, JSON.stringify(openaiHistory));
-    localStorage.setItem(LS_DISPLAY, JSON.stringify(nextDisplay));
+    safeSetItem(LS_OPENAI, JSON.stringify(openaiHistory));
+    safeSetItem(LS_DISPLAY, JSON.stringify(sanitizeForStorage(nextDisplay)));
 
     try {
       let data: BackendResponse;
@@ -174,17 +192,17 @@ export default function AIChat() {
 
       const finalMessages: DisplayMessage[] = [...messages, userMsg, ...processed];
       setMessages(finalMessages);
-      localStorage.setItem(LS_DISPLAY, JSON.stringify(finalMessages));
+      safeSetItem(LS_DISPLAY, JSON.stringify(sanitizeForStorage(finalMessages)));
 
       if (data.history) {
-        localStorage.setItem(LS_OPENAI, JSON.stringify(data.history));
+        safeSetItem(LS_OPENAI, JSON.stringify(data.history));
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Unknown error";
       const errMsg: DisplayMessage = { type: "text", content: `Error: ${msg}` };
       const finalMessages: DisplayMessage[] = [...messages, userMsg, errMsg];
       setMessages(finalMessages);
-      localStorage.setItem(LS_DISPLAY, JSON.stringify(finalMessages));
+      safeSetItem(LS_DISPLAY, JSON.stringify(sanitizeForStorage(finalMessages)));
     } finally {
       setWaiting(false);
     }

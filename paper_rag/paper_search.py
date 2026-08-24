@@ -21,7 +21,7 @@ try:
 except ImportError:
     BM25Okapi = None
 
-from paper_rag.embedder_openai import OpenAIEmbedder
+from paper_rag.embedder_local import LocalEmbedder
 
 
 # ---- Optional blacklist for junk sections ----
@@ -53,7 +53,7 @@ class PaperSearchEngine:
         rag_dir: Optional[str] = None,
         index_path: Optional[str] = None,
         meta_path: Optional[str] = None,
-        embed_model: str = "text-embedding-3-small",
+        embed_model: str = "all-MiniLM-L6-v2",
         min_score: float = 0.0,
         exclude_sections: Optional[set] = None,
     ):
@@ -75,7 +75,7 @@ class PaperSearchEngine:
             "RAG_META", os.path.join(self.rag_dir, "metadata.jsonl")
         )
 
-        self.embedder = OpenAIEmbedder(model=embed_model)
+        self.embedder = LocalEmbedder(model=embed_model)
 
         self._index = None
         self._chunks: List[PaperChunk] = []
@@ -352,7 +352,7 @@ def init_paper_search(
     rag_dir: Optional[str] = None,
     index_path: Optional[str] = None,
     meta_path: Optional[str] = None,
-    embed_model: str = "text-embedding-3-small",
+    embed_model: str = "all-MiniLM-L6-v2",
     *,
     min_score: float = 0.0,
     exclude_sections: Optional[set] = None,
